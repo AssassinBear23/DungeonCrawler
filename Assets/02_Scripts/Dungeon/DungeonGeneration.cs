@@ -1,17 +1,38 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class DungeonGeneration : MonoBehaviour
 {
+    private System.Random random;
+
     [SerializeField] private RectInt startingRoom = new(0, 0, 100, 50);
     [SerializeField] private Vector2Int minRoomSize = new(10, 10);
     [SerializeField] private int doorSize = 3;
 
     [SerializeField] private float splittingSpeed = .5f;
 
-    [SerializeField] private List<RectInt> toSplitRooms = new();
-    [SerializeField] private List<RectInt> toDrawRooms = new();
+    [SerializeField] private List<Room> toSplitRooms = new();
+    [SerializeField] private List<Room> toDrawRooms = new();
+    [SerializeField] private List<RectInt> doors = new();
+
+    [SerializeField] private int seed = 0;
+
+    [Serializable]
+    private class Room
+    {
+        public bool isConnected;
+        public bool hasDoorsPlaced;
+        public RectInt roomDimensions;
+
+        public Room(RectInt roomDimensions, bool isConnected = false, bool hasDoorsPlaced = false)
+        {
+            this.roomDimensions = roomDimensions;
+            this.isConnected = isConnected;
+            this.hasDoorsPlaced = hasDoorsPlaced;
+        }
+    }
 
     /// <summary>
     /// Coroutine that starts the dungeon generation process.
@@ -19,9 +40,12 @@ public class DungeonGeneration : MonoBehaviour
     /// <returns>IEnumerator for coroutine.</returns>
     private IEnumerator Start()
     {
+        random = new System.Random(seed);
         CreateStartingStructure();
         yield return new WaitForSeconds(1);
         yield return StartCoroutine(SplitRooms());
+        yield return new WaitForSeconds(1);
+        StartCoroutine(BuildDoors());
     }
 
 
@@ -40,7 +64,7 @@ public class DungeonGeneration : MonoBehaviour
     /// </summary>
     private void CreateStartingStructure()
     {
-        toSplitRooms.Add(startingRoom);
+        toSplitRooms.Add(new(startingRoom));
     }
 
     /// <summary>
@@ -50,40 +74,47 @@ public class DungeonGeneration : MonoBehaviour
     {
         foreach (var room in toDrawRooms)
         {
-            AlgorithmsUtils.DebugRectInt(room, Color.green);
+            AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.green);
         }
         foreach (var room in toSplitRooms)
         {
-            AlgorithmsUtils.DebugRectInt(room, Color.red);
+            AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.red);
+        }
+        foreach (var door in doors)
+        {
+            AlgorithmsUtils.DebugRectInt(door, Color.blue);
         }
     }
 
     /// <summary>
     /// Splits the rooms in the dungeon.
     /// </summary>
+    /// <param name="toSplit">The room to be split.</param>
+    /// <param name="direction">The direction to split the room.</param>
+    /// <param name="minSize">The minimum size of the split rooms.</param>
     private void SplitRoom(RectInt toSplit, Direction direction, int minSize)
     {
 
-        RectInt splitRoomA;
-        RectInt splitRoomB;
+        Room splitRoomA = new(RectInt.zero);
+        Room splitRoomB = new(RectInt.zero);
 
         // If the direction decided was vertical, then cut the room vertically
         if (direction == Direction.Vertical)
         {
-            int width = Random.Range(minSize, toSplit.width - minSize);
+            int width = random.Next(minSize, toSplit.width - minSize);
 
-            splitRoomA = new(toSplit.x, toSplit.y, width + 1, toSplit.height);
-            splitRoomB = new(toSplit.x + width, toSplit.y, toSplit.width - width, toSplit.height);
+            splitRoomA.roomDimensions = new(toSplit.x, toSplit.y, width + 1, toSplit.height);
+            splitRoomB.roomDimensions = new(toSplit.x + width, toSplit.y, toSplit.width - width, toSplit.height);
             toSplitRooms.Add(splitRoomA);
             toSplitRooms.Add(splitRoomB);
         }
         // if not vertical, then cut the room horizontally
         else
         {
-            int height = Random.Range(minSize, toSplit.height - minSize);
+            int height = random.Next(minSize, toSplit.height - minSize);
 
-            splitRoomA = new(toSplit.x, toSplit.y, toSplit.width, height + 1);
-            splitRoomB = new(toSplit.x, toSplit.y + height, toSplit.width, toSplit.height - height);
+            splitRoomA.roomDimensions = new(toSplit.x, toSplit.y, toSplit.width, height + 1);
+            splitRoomB.roomDimensions = new(toSplit.x, toSplit.y + height, toSplit.width, toSplit.height - height);
             toSplitRooms.Add(splitRoomA);
             toSplitRooms.Add(splitRoomB);
         }
@@ -97,16 +128,16 @@ public class DungeonGeneration : MonoBehaviour
     {
         while (toSplitRooms.Count > 0)
         {
-            RectInt toSplitRoom = toSplitRooms.Pop(0);
+            Room toSplitRoom = toSplitRooms.Pop(0);
 
-            int minSize = Random.Range(minRoomSize.x, minRoomSize.y);
+            int minSize = random.Next(minRoomSize.x, minRoomSize.y);
             //int minSize = 10;
 
             //Debug.Log("minSize:\t" + minSize);
 
             Debug.Log("Currently want to split " + toSplitRoom);
 
-            if (toSplitRoom.width / 2 < minSize && toSplitRoom.height / 2 < minSize)
+            if (toSplitRoom.roomDimensions.width / 2 < minSize && toSplitRoom.roomDimensions.height / 2 < minSize)
             {
                 Debug.Log("Current room to split is too small to split further. Current size is " + toSplitRoom);
                 toDrawRooms.Add(toSplitRoom);
@@ -116,7 +147,7 @@ public class DungeonGeneration : MonoBehaviour
             // Get the direction to split the room into.
             Direction direction;
 
-            if (toSplitRoom.height >= toSplitRoom.width)
+            if (toSplitRoom.roomDimensions.height >= toSplitRoom.roomDimensions.width)
             {
                 direction = Direction.Horizontal;
             }
@@ -125,12 +156,50 @@ public class DungeonGeneration : MonoBehaviour
                 direction = Direction.Vertical;
             }
 
-            SplitRoom(toSplitRoom, direction, minSize);
+            SplitRoom(toSplitRoom.roomDimensions, direction, minSize);
 
             yield return new WaitForSeconds(splittingSpeed);
 
         }
     }
+
+    /// <summary>
+    /// Coroutine that builds doors between rooms in the dungeon.
+    /// </summary>
+    /// <returns>IEnumerator for coroutine.</returns>
+    private IEnumerator BuildDoors()
+    {
+        for (int i = 0; i < toDrawRooms.Count - 1; i++)
+        {
+            for (int j = i + 1; j < toDrawRooms.Count; j++)
+            {
+                if (!AlgorithmsUtils.Intersects(toDrawRooms[i].roomDimensions, toDrawRooms[j].roomDimensions)
+                    || toDrawRooms[i].roomDimensions == toDrawRooms[j].roomDimensions
+                    || toDrawRooms[j].hasDoorsPlaced) continue;
+
+                RectInt intersectArea = AlgorithmsUtils.Intersect(toDrawRooms[i].roomDimensions, toDrawRooms[j].roomDimensions);
+
+                if (intersectArea.width < doorSize + 2 && intersectArea.height < doorSize + 2) continue;
+
+                if (intersectArea.width < intersectArea.height)
+                {
+                    intersectArea.y += random.Next(1, intersectArea.height - doorSize - 1);
+                    intersectArea.height = doorSize;
+                    doors.Add(intersectArea);
+                }
+                else
+                {
+                    intersectArea.x += random.Next(1, intersectArea.width - doorSize - 1);
+                    intersectArea.width = doorSize;
+                    doors.Add(intersectArea);
+                }
+
+                yield return new WaitForSeconds(splittingSpeed / 10);
+            }
+            toDrawRooms[i].hasDoorsPlaced = true;
+            yield return new WaitForSeconds(splittingSpeed);
+        }
+    }   
     #endregion
 }
 

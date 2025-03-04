@@ -455,11 +455,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: 0
   dungeonSize: {x: 100, y: 100}
-  minRoomSize: {x: 9, y: 25}
-  doorSize: 3
-  splittingSpeed: 0.3
+  generationSettings:
+    seed: 0
+    minRoomSize: {x: 10, y: 10}
+    doorSize: 3
+    splittingSpeed: 0.5
+    maxRemovalAmount: 50
+    removeMaxRooms: 0
+    minimumDoorCreation: 0
   toSplitRooms: []
   toDrawRooms: []
   doors: []

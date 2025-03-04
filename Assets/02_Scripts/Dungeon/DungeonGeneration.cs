@@ -5,34 +5,16 @@ using UnityEngine;
 
 public class DungeonGeneration : MonoBehaviour
 {
-    private System.Random random;
+    [Header("Dungeon Settings")]
+    [SerializeField] private Vector2Int dungeonSize = new(100, 100);
+    [SerializeField] private GenerationSettings generationSettings;
 
-    [SerializeField] private RectInt startingRoom = new(0, 0, 100, 50);
-    [SerializeField] private Vector2Int minRoomSize = new(10, 10);
-    [SerializeField] private int doorSize = 3;
-
-    [SerializeField] private float splittingSpeed = .5f;
-
+    [Header("Debugging Lists")]
     [SerializeField] private List<Room> toSplitRooms = new();
     [SerializeField] private List<Room> toDrawRooms = new();
     [SerializeField] private List<RectInt> doors = new();
 
-    [SerializeField] private int seed = 0;
-
-    [Serializable]
-    private class Room
-    {
-        public bool isConnected;
-        public bool hasDoorsPlaced;
-        public RectInt roomDimensions;
-
-        public Room(RectInt roomDimensions, bool isConnected = false, bool hasDoorsPlaced = false)
-        {
-            this.roomDimensions = roomDimensions;
-            this.isConnected = isConnected;
-            this.hasDoorsPlaced = hasDoorsPlaced;
-        }
-    }
+    private System.Random random;
 
     /// <summary>
     /// Coroutine that starts the dungeon generation process.
@@ -40,14 +22,14 @@ public class DungeonGeneration : MonoBehaviour
     /// <returns>IEnumerator for coroutine.</returns>
     private IEnumerator Start()
     {
-        random = new System.Random(seed);
-        CreateStartingStructure();
+        random = new System.Random(generationSettings.seed);
+        CreateOuterBounds();
         yield return new WaitForSeconds(1);
         yield return StartCoroutine(SplitRooms());
         yield return new WaitForSeconds(1);
+        yield return StartCoroutine(RemoveRandomRooms());
         StartCoroutine(BuildDoors());
     }
-
 
     /// <summary>
     /// Updates the dungeon visualization every frame.
@@ -60,11 +42,11 @@ public class DungeonGeneration : MonoBehaviour
     #region Methods
 
     /// <summary>
-    /// Creates the initial structure of the dungeon.
+    /// Sets the outer bounds of the dungeon. Dictated by <see cref="dungeonSize">dungeonSize</see> variable.
     /// </summary>
-    private void CreateStartingStructure()
+    private void CreateOuterBounds()
     {
-        toSplitRooms.Add(new(startingRoom));
+        toSplitRooms.Add(new(new(0, 0, dungeonSize.x, dungeonSize.y)));
     }
 
     /// <summary>
@@ -130,7 +112,7 @@ public class DungeonGeneration : MonoBehaviour
         {
             Room toSplitRoom = toSplitRooms.Pop(0);
 
-            int minSize = random.Next(minRoomSize.x, minRoomSize.y);
+            int minSize = random.Next(generationSettings.minRoomSize.x, generationSettings.minRoomSize.y);
             //int minSize = 10;
 
             //Debug.Log("minSize:\t" + minSize);
@@ -158,7 +140,7 @@ public class DungeonGeneration : MonoBehaviour
 
             SplitRoom(toSplitRoom.roomDimensions, direction, minSize);
 
-            yield return new WaitForSeconds(splittingSpeed);
+            yield return new WaitForSeconds(generationSettings.splittingSpeed);
 
         }
     }
@@ -169,6 +151,7 @@ public class DungeonGeneration : MonoBehaviour
     /// <returns>IEnumerator for coroutine.</returns>
     private IEnumerator BuildDoors()
     {
+        int doorSize = generationSettings.doorSize;
         for (int i = 0; i < toDrawRooms.Count - 1; i++)
         {
             for (int j = i + 1; j < toDrawRooms.Count; j++)
@@ -194,18 +177,67 @@ public class DungeonGeneration : MonoBehaviour
                     doors.Add(intersectArea);
                 }
 
-                yield return new WaitForSeconds(splittingSpeed / 10);
+                yield return new WaitForSeconds(generationSettings.splittingSpeed / 10);
             }
             toDrawRooms[i].hasDoorsPlaced = true;
-            yield return new WaitForSeconds(splittingSpeed);
+            yield return new WaitForSeconds(generationSettings.splittingSpeed);
         }
-    }   
+    }
+
+    private IEnumerator RemoveRandomRooms()
+    {
+        // Calculate the maximum amount of rooms to remove, clamped between 0 and the amount of rooms to draw so it doesnt accidentally go negative.
+        int maxRemovalAmount = Mathf.Clamp(toDrawRooms.Count * (generationSettings.maxRemovalAmount / 100), 0, toDrawRooms.Count);
+
+        // Get the amount of rooms to remove, a value between 0 and maxRemovalAmount.
+        int removeAmount;
+        if (generationSettings.removeMaxRooms)
+        {
+            removeAmount = maxRemovalAmount;
+        }
+        else
+        {
+            removeAmount = random.Next(0, maxRemovalAmount);
+        }
+        yield return null;
+    }
     #endregion
+
+    #region data classes
+    [Serializable]
+    private class GenerationSettings
+    {
+        public int seed = 0;
+        public Vector2Int minRoomSize = new(10, 10);
+        [Range(2, 5)] public int doorSize = 3;
+        [Space(10)] public float splittingSpeed = .5f;
+        [Tooltip("This amount max amount of rooms to remove, if removeMaxRooms is set to true, it will remove this percentage of rooms.")]
+        [Range(0, 100)] public int maxRemovalAmount = 50;
+        [Tooltip("This boolean decides if you remove the exact amount of rooms or a random amount between 0 and the max amount of rooms to remove.")]
+        public bool removeMaxRooms = false;
+        public bool minimumDoorCreation = false;
+    }
+
+    [Serializable]
+    private class Room
+    {
+        public bool isConnected = false;
+        public bool hasDoorsPlaced = false;
+        public RectInt roomDimensions;
+
+        public Room(RectInt roomDimensions, bool isConnected = false, bool hasDoorsPlaced = false)
+        {
+            this.roomDimensions = roomDimensions;
+            this.isConnected = isConnected;
+            this.hasDoorsPlaced = hasDoorsPlaced;
+        }
+    }
+    #endregion data classes
 }
 
 /// <summary>
 /// Enum representing the possible directions for room splitting.
-/// </summary>
+/// </summary>ec
 enum Direction
 {
     Vertical,

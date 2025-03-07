@@ -455,25 +455,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dungeonSize: {x: 100, y: 100}
+  dungeonSize: {x: 400, y: 400}
   generationSettings:
     seed: 687651687
-    minRoomSize: {x: 6, y: 15}
-    doorSize: 4
+    minRoomSize: {x: 4, y: 25}
+    doorSize: 2
     splittingSpeed: 0.001
-    maxRemovalAmount: 50
-    removeMaxRooms: 1
+    maxRemovalAmount: 0
+    removeMaxRooms: 0
     minimumDoorCreation: 1
   drawDungeon: 1
   drawDoors: 1
-  drawDeletedRooms: 1
-  drawUnreachableRooms: 1
+  drawDeletedRooms: 0
+  drawUnreachableRooms: 0
   drawStarterRoom: 1
+  drawGraph: 1
   toSplitRooms: []
   toDrawRooms: []
   deletedRooms: []
   unreachableRooms: []
   doors: []
+  graphs: []
 --- !u!4 &1564286927
 Transform:
   m_ObjectHideFlags: 0

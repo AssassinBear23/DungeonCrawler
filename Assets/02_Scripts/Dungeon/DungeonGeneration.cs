@@ -16,6 +16,7 @@ public class DungeonGeneration : MonoBehaviour
     [SerializeField] private bool drawDeletedRooms;
     [SerializeField] private bool drawUnreachableRooms;
     [SerializeField] private bool drawStarterRoom;
+    [SerializeField] private bool drawGraph;
     [Space(10), HorizontalLine(height: 1)]
     [Header("Debugging Lists")]
     [SerializeField] private List<Room> toSplitRooms = new();
@@ -24,7 +25,10 @@ public class DungeonGeneration : MonoBehaviour
     [SerializeField] private List<Room> unreachableRooms = new();
     [SerializeField] private List<RectInt> doors = new();
     [SerializeField] private List<Graph<Room>> graphs = new();
+    [HorizontalLine(height: 1)]
 
+    private int mainGraphIndex;
+    private bool mainGraphFound = false;
 
     private System.Random random;
 
@@ -32,8 +36,11 @@ public class DungeonGeneration : MonoBehaviour
     /// Coroutine that starts the dungeon generation process.
     /// </summary>
     /// <returns>IEnumerator for coroutine.</returns>
+    [Button("Start Dungeon Generation", EButtonEnableMode.Playmode)]
     private IEnumerator Start()
     {
+        Reset();
+
         random = new System.Random(generationSettings.seed);
         CreateOuterBounds();
         yield return new WaitForSeconds(1);
@@ -42,10 +49,21 @@ public class DungeonGeneration : MonoBehaviour
         yield return StartCoroutine(RemoveRandomRooms());
         yield return new WaitForSeconds(1);
         CreateGraph();
-        FilterGraphs();
-
+        yield return StartCoroutine(FilterGraphs());
     }
 
+    /// <summary>
+    /// Resets the dungeon generation process.
+    /// </summary>
+    private void Reset()
+    {
+        toSplitRooms.Clear();
+        toDrawRooms.Clear();
+        deletedRooms.Clear();
+        unreachableRooms.Clear();
+        doors.Clear();
+        graphs.Clear();
+    }
 
 
     /// <summary>
@@ -53,7 +71,7 @@ public class DungeonGeneration : MonoBehaviour
     /// </summary>
     void Update()
     {
-        VisualizeRooms();
+        Visualization();
     }
 
     #region Methods
@@ -69,7 +87,7 @@ public class DungeonGeneration : MonoBehaviour
     /// <summary>
     /// Visualizes the rooms in the dungeon.
     /// </summary>
-    private void VisualizeRooms()
+    private void Visualization()
     {
         foreach (Room room in toSplitRooms)
         {
@@ -96,7 +114,7 @@ public class DungeonGeneration : MonoBehaviour
                 AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.yellow);
             }
         }
-        if (drawDoors)
+        if (drawDoors && drawDungeon)
         {
             foreach (var door in doors)
             {
@@ -110,6 +128,69 @@ public class DungeonGeneration : MonoBehaviour
                 if (room.isStartingRoom) AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.magenta);
             }
         }
+        if (drawGraph && mainGraphFound)
+        {
+            if (graphs.Count == 0) return;
+            VisualizeGraph();
+        }
+    }
+
+    /// <summary>
+    /// Visualize the graph of the dungeon.
+    /// </summary>
+    private void VisualizeGraph()
+    {
+        // List to keep track of rooms that have been visualized.
+        Dictionary<Room, List<Room>> visualizedRoomPairs = new();
+
+        Graph<Room> graph = graphs[mainGraphIndex];
+
+        List<Room> rooms = graph.GetNodes();
+
+        // Iterate through each room in the graph.
+        foreach (Room room in rooms)
+        {
+            // Visualize the room with a white rectangle.
+            AlgorithmsUtils.DebugRectInt(CalculateOverlayPosition(room), Color.white);
+
+            // Add the room to the list of visualized rooms.
+            visualizedRoomPairs.Add(room, new());
+
+            // Get the neighbors of the current room.
+            List<Room> neighbors = graph.GetNeighbours(room);
+
+            // Iterate through each neighbor of the current room.
+            foreach (Room neighbor in neighbors)
+            {
+                // If the neighbor has already been visualized, skip it.
+                if (visualizedRoomPairs.ContainsKey(neighbor)) continue;
+
+                // Visualize the neighbor with a black rectangle.
+                AlgorithmsUtils.DebugRectInt(CalculateOverlayPosition(neighbor), Color.white);
+
+                Vector2 roomCenter = CalculateOverlayPosition(room).center;
+                Vector2 neighbourCenter = CalculateOverlayPosition(neighbor).center;
+                Debug.DrawLine(new(roomCenter.x, 0, roomCenter.y), new(neighbourCenter.x, 0, neighbourCenter.y), Color.white);
+
+                // Add the neighbor to the list of visualized rooms.
+                visualizedRoomPairs[room].Add(neighbor);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Calculates the overlay position of a given room.
+    /// </summary>
+    /// <param name="room">The room for which to calculate the overlay position.</param>
+    /// <returns>A RectInt representing the overlay position of the room.</returns>
+    private RectInt CalculateOverlayPosition(Room room)
+    {
+        RectInt position = room.roomDimensions;
+        position.x += position.width / 2;
+        position.y += position.height / 2;
+        position.width = 1;
+        position.height = 1;
+        return position;
     }
 
     /// <summary>
@@ -220,10 +301,66 @@ public class DungeonGeneration : MonoBehaviour
     }
 
     /// <summary>
-    /// Builds the doors between two rooms.
+    /// Builds the doors between rooms using Depth-First Search (DFS) to ensure each door is created only once.
+    /// </summary>
+    private IEnumerator CreateDoors(int graphIndex)
+    {
+        Graph<Room> startGraph = graphs[graphIndex];
+        Graph<Room> graphWithDoors = new();
+        List<Room> rooms = startGraph.GetNodes();
+        HashSet<Room> visited = new();
+        Stack<Room> stack = new();
+        int doorSize = generationSettings.doorSize;
+
+        if (rooms.Count == 0) yield break;
+
+        stack.Push(rooms[0]);
+
+        while (stack.Count > 0)
+        {
+            Room current = stack.Pop();
+            if (visited.Contains(current)) continue;
+
+            // Mark the room as visited.
+            visited.Add(current);
+
+            // Add the room to the graph with doors.
+            graphWithDoors.AddNode(current);
+
+            List<Room> neighbors = startGraph.GetNeighbours(current);
+
+            foreach (Room neighbor in neighbors)
+            {
+                if (!visited.Contains(neighbor))
+                {
+                    RectInt intersectArea = AlgorithmsUtils.Intersect(current.roomDimensions, neighbor.roomDimensions);
+
+                    Room door = new(CreateDoor(intersectArea, doorSize));
+                    doors.Add(door.roomDimensions);
+
+                    graphWithDoors.AddNode(neighbor);
+                    graphWithDoors.AddNode(door);
+
+                    graphWithDoors.AddEdge(current, door);
+                    graphWithDoors.AddEdge(door, neighbor);
+
+                    yield return new WaitForSeconds(generationSettings.splittingSpeed / 10);
+
+                    stack.Push(neighbor);
+                }
+            }
+        }
+
+        graphs[graphIndex] = graphWithDoors;
+    }
+
+    /// <summary>
+    /// Creates a door between two rooms.
     /// </summary>
     /// <param name="intersectArea">The area where the two rooms intersect.</param>
-    private RectInt BuildDoor(RectInt intersectArea, int doorSize)
+    /// <param name="doorSize">The size of the door to create.</param>
+    /// <returns>A RectInt representing the door's dimensions and position.</returns>
+    private RectInt CreateDoor(RectInt intersectArea, int doorSize)
     {
         if (intersectArea.width < intersectArea.height)
         {
@@ -264,7 +401,7 @@ public class DungeonGeneration : MonoBehaviour
     /// <summary>
     /// Filters the graphs to remove any unreachable rooms.
     /// </summary>
-    private void FilterGraphs()
+    private IEnumerator FilterGraphs()
     {
         int highestRoomCountGraphIndex = 0;
 
@@ -284,10 +421,15 @@ public class DungeonGeneration : MonoBehaviour
 
             foreach (Room room in rooms)
             {
-                if (room.isDoor) continue;
                 unreachableRooms.Add(toDrawRooms.Pop(toDrawRooms.IndexOf(room)));
             }
         }
+
+        yield return new WaitForSeconds(1);
+        yield return StartCoroutine(CreateDoors(highestRoomCountGraphIndex));
+
+        mainGraphIndex = highestRoomCountGraphIndex;
+        mainGraphFound = true;
     }
 
     /// <summary>
@@ -295,7 +437,49 @@ public class DungeonGeneration : MonoBehaviour
     /// </summary>
     private Graph<Room> CreateMultipleDoorGraph(List<Room> toCheck)
     {
+        // Graph to store the connections in
         Graph<Room> connections = new();
+        // List 
+        List<Room> connectedRooms = new();
+
+        int doorSize = generationSettings.doorSize;
+
+        // Add the first room to the graph.
+        connectedRooms.Add(toCheck.Pop(0));
+        connectedRooms[0].isStartingRoom = true;
+        connectedRooms[0].isConnected = true;
+
+        for (int i = 0; i < connectedRooms.Count; i++)
+        {
+            for (int j = 0; j < toCheck.Count; j++)
+            {
+                // If the rooms do not intersect or are the same room, continue.
+                if (!AlgorithmsUtils.Intersects(connectedRooms[i].roomDimensions, toCheck[j].roomDimensions)
+                    || connectedRooms[i].roomDimensions == toCheck[j].roomDimensions) continue;
+
+                RectInt intersectArea = AlgorithmsUtils.Intersect(connectedRooms[i].roomDimensions, toCheck[j].roomDimensions);
+
+                // If the intersect area is too small to place a door, continue.
+                if (intersectArea.width < doorSize + 2 && intersectArea.height < doorSize + 2) continue;
+
+                connections.AddNode(connectedRooms[i]);
+                connections.AddNode(toCheck[j]);
+
+                connections.AddEdge(connectedRooms[i], toCheck[j]);
+
+                connectedRooms.Add(toCheck.Pop(j));
+                j--;
+            }
+        }
+
+
+
+        // If the key doesnt exist, then we add it to the connections graph.
+        if (connections.GetNeighbours(connectedRooms[0]) == null)
+        {
+            connections.AddNode(connectedRooms[0]);
+        }
+
         return connections;
     }
 
@@ -306,43 +490,43 @@ public class DungeonGeneration : MonoBehaviour
     {
         // Create a graph to store the connections between rooms.
         Graph<Room> connections = new();
-        // Create a list of rooms that are eligible to have doors between them.
-        List<Room> eligbleRooms = new();
+        // Create a list for rooms that have a been added to the connections graph
+        List<Room> connectedRooms = new();
 
         int doorSize = generationSettings.doorSize;
 
         // Add the first room to the graph.
-        eligbleRooms.Add(toCheck.Pop(0));
+        connectedRooms.Add(toCheck.Pop(0));
+        connectedRooms[0].isStartingRoom = true;
+        connectedRooms[0].isConnected = true;
 
-        for (int i = 0; i < eligbleRooms.Count; i++)
+        for (int i = 0; i < connectedRooms.Count; i++)
         {
             for (int j = 0; j < toCheck.Count; j++)
             {
                 // If the rooms do not intersect or are the same room, continue.
-                if (!AlgorithmsUtils.Intersects(eligbleRooms[i].roomDimensions, toCheck[j].roomDimensions)
-                    || eligbleRooms[i].roomDimensions == toCheck[j].roomDimensions) continue;
+                if (!AlgorithmsUtils.Intersects(connectedRooms[i].roomDimensions, toCheck[j].roomDimensions)
+                    || connectedRooms[i].roomDimensions == toCheck[j].roomDimensions) continue;
 
-                RectInt intersectArea = AlgorithmsUtils.Intersect(eligbleRooms[i].roomDimensions, toCheck[j].roomDimensions);
+                RectInt intersectArea = AlgorithmsUtils.Intersect(connectedRooms[i].roomDimensions, toCheck[j].roomDimensions);
 
                 // If the intersect area is too small to place a door, continue.
                 if (intersectArea.width < doorSize + 2 && intersectArea.height < doorSize + 2) continue;
 
-                Room door = new(BuildDoor(intersectArea, doorSize), true);
-                connections.AddNode(door);
-                connections.AddNode(eligbleRooms[i]);
+                connections.AddNode(connectedRooms[i]);
                 connections.AddNode(toCheck[j]);
 
-                connections.AddEdge(eligbleRooms[i], door);
-                connections.AddEdge(toCheck[j], door);
+                connections.AddEdge(connectedRooms[i], toCheck[j]);
 
-                eligbleRooms.Add(toCheck.Pop(j));
+                connectedRooms.Add(toCheck.Pop(j));
                 j--;
             }
         }
 
-        if(connections.GetNeighbours(eligbleRooms[0]) == null)
+        // If the key doesnt exist, then we add it to the connections graph.
+        if (connections.GetNeighbours(connectedRooms[0]) == null)
         {
-            connections.AddNode(eligbleRooms[0]);
+            connections.AddNode(connectedRooms[0]);
         }
 
         return connections;
@@ -369,17 +553,19 @@ public class DungeonGeneration : MonoBehaviour
         public bool minimumDoorCreation = false;
     }
 
+
+
     [Serializable]
     private class Room
     {
         public bool isStartingRoom = false;
-        public bool isDoor = false;
+        public bool isConnected = false;
         public RectInt roomDimensions;
 
-        public Room(RectInt roomDimensions, bool isDoor = false, bool isStartingRoom = false)
+        public Room(RectInt roomDimensions, bool isConnected = false, bool isStartingRoom = false)
         {
             this.roomDimensions = roomDimensions;
-            this.isDoor = isDoor;
+            this.isConnected = isConnected;
             this.isStartingRoom = isStartingRoom;
         }
     }

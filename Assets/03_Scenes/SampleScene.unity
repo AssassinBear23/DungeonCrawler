@@ -455,13 +455,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dungeonSize: {x: 100, y: 100}
+  dungeonSize: {x: 200, y: 100}
   generationSettings:
     seed: 687651687
     minRoomSize: {x: 6, y: 15}
     doorSize: 4
     splittingSpeed: 0.001
-    maxRemovalAmount: 50
+    maxRemovalAmount: 36
     removeMaxRooms: 1
     minimumDoorCreation: 1
   drawDungeon: 1
@@ -474,6 +474,7 @@ MonoBehaviour:
   deletedRooms: []
   unreachableRooms: []
   doors: []
+  graphs: []
 --- !u!4 &1564286927
 Transform:
   m_ObjectHideFlags: 0

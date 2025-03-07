@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using AYellowpaper.SerializedCollections;
+using System.Linq;
 
 [Serializable]
 public class Graph<T>
@@ -48,9 +49,9 @@ public class Graph<T>
         }
         return adjacencies[node];
     }
-    
+
     public List<T> GetNodes()
     {
-        return new List<T>(adjacencies.Keys);
+        return adjacencies.Keys.ToList();
     }
 }

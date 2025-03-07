@@ -1,13 +1,16 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using AYellowpaper.SerializedCollections;
 
+[Serializable]
 public class Graph<T>
 {
-    private Dictionary<T, List<T>> adjacencies;
+    [SerializeField] private SerializedDictionary<T, List<T>> adjacencies;
 
     public Graph()
     {
-        adjacencies = new Dictionary<T, List<T>>();
+        adjacencies = new();
     }
 
     public void AddNode(T node)
@@ -31,6 +34,11 @@ public class Graph<T>
         adjacencies[toNode].Add(fromNode);
     }
 
+    public int GetNodeCount()
+    {
+        return adjacencies.Count;
+    }
+
     public List<T> GetNeighbours(T node)
     {
         if (!adjacencies.ContainsKey(node))
@@ -39,5 +47,10 @@ public class Graph<T>
             return null;
         }
         return adjacencies[node];
+    }
+    
+    public List<T> GetNodes()
+    {
+        return new List<T>(adjacencies.Keys);
     }
 }

@@ -457,15 +457,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dungeonSize: {x: 100, y: 100}
   generationSettings:
-    seed: 0
+    seed: 687651687
     minRoomSize: {x: 10, y: 10}
     doorSize: 3
-    splittingSpeed: 0.5
+    splittingSpeed: 0.001
     maxRemovalAmount: 50
-    removeMaxRooms: 0
+    removeMaxRooms: 1
     minimumDoorCreation: 0
+  drawDungeon: 1
+  drawDoors: 1
+  drawDeletedRooms: 0
+  drawUnreachableRooms: 1
   toSplitRooms: []
   toDrawRooms: []
+  deletedRooms: []
+  unreachableRooms: []
   doors: []
 --- !u!4 &1564286927
 Transform:

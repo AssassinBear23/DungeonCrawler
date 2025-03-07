@@ -9,10 +9,19 @@ public class DungeonGeneration : MonoBehaviour
     [SerializeField] private Vector2Int dungeonSize = new(100, 100);
     [SerializeField] private GenerationSettings generationSettings;
 
+    [Header("Visualization")]
+    [SerializeField] bool drawDungeon;
+    [SerializeField] bool drawDoors;
+    [SerializeField] bool drawDeletedRooms;
+    [SerializeField] bool drawUnreachableRooms;
+
     [Header("Debugging Lists")]
     [SerializeField] private List<Room> toSplitRooms = new();
     [SerializeField] private List<Room> toDrawRooms = new();
+    [SerializeField] private List<Room> deletedRooms = new();
+    [SerializeField] private List<Room> unreachableRooms = new();
     [SerializeField] private List<RectInt> doors = new();
+
 
     private System.Random random;
 
@@ -28,6 +37,7 @@ public class DungeonGeneration : MonoBehaviour
         yield return StartCoroutine(SplitRooms());
         yield return new WaitForSeconds(1);
         yield return StartCoroutine(RemoveRandomRooms());
+        yield return new WaitForSeconds(1);
         StartCoroutine(BuildDoors());
     }
 
@@ -54,17 +64,37 @@ public class DungeonGeneration : MonoBehaviour
     /// </summary>
     private void VisualizeRooms()
     {
-        foreach (var room in toDrawRooms)
+        foreach (Room room in toSplitRooms)
         {
-            AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.green);
+            AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.cyan);
         }
-        foreach (var room in toSplitRooms)
+        if (drawDungeon)
         {
-            AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.red);
+            foreach (Room room in toDrawRooms)
+            {
+                AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.green);
+            }
         }
-        foreach (var door in doors)
+        if (drawDeletedRooms)
         {
-            AlgorithmsUtils.DebugRectInt(door, Color.blue);
+            foreach (Room room in deletedRooms)
+            {
+                AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.red);
+            }
+        }
+        if (drawUnreachableRooms)
+        {
+            foreach (Room room in unreachableRooms)
+            {
+                AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.yellow);
+            }
+        }
+        if (drawDoors)
+        {
+            foreach (var door in doors)
+            {
+                AlgorithmsUtils.DebugRectInt(door, Color.blue);
+            }
         }
     }
 
@@ -151,14 +181,24 @@ public class DungeonGeneration : MonoBehaviour
     /// <returns>IEnumerator for coroutine.</returns>
     private IEnumerator BuildDoors()
     {
+
+
         int doorSize = generationSettings.doorSize;
+
         for (int i = 0; i < toDrawRooms.Count - 1; i++)
         {
+            if (i == 0)
+            {
+                toDrawRooms[i].isConnected = true;
+                toDrawRooms[i].isStartingRoom = true;
+            }
+
             for (int j = i + 1; j < toDrawRooms.Count; j++)
             {
                 if (!AlgorithmsUtils.Intersects(toDrawRooms[i].roomDimensions, toDrawRooms[j].roomDimensions)
                     || toDrawRooms[i].roomDimensions == toDrawRooms[j].roomDimensions
-                    || toDrawRooms[j].hasDoorsPlaced) continue;
+                    || toDrawRooms[j].hasDoorsPlaced
+                    || toDrawRooms[j].isConnected) continue;
 
                 RectInt intersectArea = AlgorithmsUtils.Intersect(toDrawRooms[i].roomDimensions, toDrawRooms[j].roomDimensions);
 
@@ -177,6 +217,8 @@ public class DungeonGeneration : MonoBehaviour
                     doors.Add(intersectArea);
                 }
 
+                if (toDrawRooms[i].isConnected) toDrawRooms[j].isConnected = true;
+
                 yield return new WaitForSeconds(generationSettings.splittingSpeed / 10);
             }
             toDrawRooms[i].hasDoorsPlaced = true;
@@ -187,7 +229,8 @@ public class DungeonGeneration : MonoBehaviour
     private IEnumerator RemoveRandomRooms()
     {
         // Calculate the maximum amount of rooms to remove, clamped between 0 and the amount of rooms to draw so it doesnt accidentally go negative.
-        int maxRemovalAmount = Mathf.Clamp(toDrawRooms.Count * (generationSettings.maxRemovalAmount / 100), 0, toDrawRooms.Count);
+        int maxRemovalAmount = (int)(toDrawRooms.Count * (generationSettings.maxRemovalAmount / 100f));
+        maxRemovalAmount = Mathf.Clamp(maxRemovalAmount, 0, toDrawRooms.Count);
 
         // Get the amount of rooms to remove, a value between 0 and maxRemovalAmount.
         int removeAmount;
@@ -199,7 +242,15 @@ public class DungeonGeneration : MonoBehaviour
         {
             removeAmount = random.Next(0, maxRemovalAmount);
         }
-        yield return null;
+
+        for (int i = 0; i < removeAmount; i++)
+        {
+            int index = random.Next(0, toDrawRooms.Count);
+            deletedRooms.Add(toDrawRooms.Pop(index));
+            yield return new WaitForSeconds(generationSettings.splittingSpeed / 10);
+        }
+
+    }
     }
     #endregion
 
@@ -223,12 +274,14 @@ public class DungeonGeneration : MonoBehaviour
     {
         public bool isConnected = false;
         public bool hasDoorsPlaced = false;
+        public bool isStartingRoom = false;
         public RectInt roomDimensions;
 
-        public Room(RectInt roomDimensions, bool isConnected = false, bool hasDoorsPlaced = false)
+        public Room(RectInt roomDimensions, bool isConnected = false, bool hasDoorsPlaced = false, bool isStartingRoom = false)
         {
             this.roomDimensions = roomDimensions;
             this.isConnected = isConnected;
+            this.isStartingRoom = isStartingRoom;
             this.hasDoorsPlaced = hasDoorsPlaced;
         }
     }

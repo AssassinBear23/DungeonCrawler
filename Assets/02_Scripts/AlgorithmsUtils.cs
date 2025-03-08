@@ -100,6 +100,14 @@ public class AlgorithmsUtils
 
 public static class ListExtensions
 {
+    /// <summary>
+    /// Removes and returns the element at the specified index from the list.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the list.</typeparam>
+    /// <param name="list">The list to remove the element from.</param>
+    /// <param name="index">The zero-based index of the element to remove and return.</param>
+    /// <returns>The element that was removed from the list.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the list is null or empty.</exception>
     public static T Pop<T>(this List<T> list, int index)
     {
         if (list == null || list.Count == 0)

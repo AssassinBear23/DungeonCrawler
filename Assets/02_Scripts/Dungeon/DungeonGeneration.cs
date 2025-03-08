@@ -4,6 +4,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// TODO: 
+/// - Add comments to the DungeonGeneration class.
+/// - Rework the RemoveRandomRooms method to remove 10% of the rooms, smallest first. Stopping if it disconnects the dungeon
+/// - Rework the system so a graph is made BEFORE removing rooms, then remove rooms until before the graph is fully disconnected.
+
+/// <summary>
+/// 
+/// </summary>
 public class DungeonGeneration : MonoBehaviour
 {
     [Header("Dungeon Settings")]
@@ -63,6 +71,8 @@ public class DungeonGeneration : MonoBehaviour
         unreachableRooms.Clear();
         doors.Clear();
         graphs.Clear();
+        mainGraphFound = false;
+        mainGraphIndex = 0;
     }
 
 

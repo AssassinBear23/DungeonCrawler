@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// TODO: 
-/// - Add comments to the DungeonGeneration class.
 /// - Rework the RemoveRandomRooms method to remove 10% of the rooms, smallest first. Stopping if it disconnects the dungeon
 /// - Rework the system so a graph is made BEFORE removing rooms, then remove rooms until before the graph is fully disconnected.
 
 /// <summary>
-/// 
+/// Class thats responsible for generating a dungeon. It makes use of <see cref="Room">Room</see> and <see cref="Graph{T}">Graph</see> classes.
+/// <para> Settings set in <see cref="GenerationSettings"> Generation Settings</see></para>
 /// </summary>
 public class DungeonGeneration : MonoBehaviour
 {
@@ -35,10 +35,10 @@ public class DungeonGeneration : MonoBehaviour
     [SerializeField] private List<Graph<Room>> graphs = new();
     [HorizontalLine(height: 1)]
 
-    private int mainGraphIndex;
-    private bool mainGraphFound = false;
+    private int _mainGraphIndex;
+    private bool _mainGraphFound;
 
-    private System.Random random;
+    private System.Random _random;
 
     /// <summary>
     /// Coroutine that starts the dungeon generation process.
@@ -49,7 +49,7 @@ public class DungeonGeneration : MonoBehaviour
     {
         Reset();
 
-        random = new System.Random(generationSettings.seed);
+        _random = new System.Random(generationSettings.seed);
         CreateOuterBounds();
         yield return new WaitForSeconds(1);
         yield return StartCoroutine(SplitRooms());
@@ -71,15 +71,15 @@ public class DungeonGeneration : MonoBehaviour
         unreachableRooms.Clear();
         doors.Clear();
         graphs.Clear();
-        mainGraphFound = false;
-        mainGraphIndex = 0;
+        _mainGraphFound = false;
+        _mainGraphIndex = 0;
     }
 
 
     /// <summary>
     /// Updates the dungeon visualization every frame.
     /// </summary>
-    void Update()
+    private void Update()
     {
         Visualization();
     }
@@ -138,7 +138,7 @@ public class DungeonGeneration : MonoBehaviour
                 if (room.isStartingRoom) AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.magenta);
             }
         }
-        if (drawGraph && mainGraphFound)
+        if (drawGraph && _mainGraphFound)
         {
             if (graphs.Count == 0) return;
             VisualizeGraph();
@@ -153,7 +153,7 @@ public class DungeonGeneration : MonoBehaviour
         // List to keep track of rooms that have been visualized.
         Dictionary<Room, List<Room>> visualizedRoomPairs = new();
 
-        Graph<Room> graph = graphs[mainGraphIndex];
+        Graph<Room> graph = graphs[_mainGraphIndex];
 
         List<Room> rooms = graph.GetNodes();
 
@@ -218,7 +218,7 @@ public class DungeonGeneration : MonoBehaviour
         // If the direction decided was vertical, then cut the room vertically
         if (direction == Direction.Vertical)
         {
-            int width = random.Next(minSize, toSplit.width - minSize);
+            int width = _random.Next(minSize, toSplit.width - minSize);
 
             splitRoomA.roomDimensions = new(toSplit.x, toSplit.y, width + 1, toSplit.height);
             splitRoomB.roomDimensions = new(toSplit.x + width, toSplit.y, toSplit.width - width, toSplit.height);
@@ -228,7 +228,7 @@ public class DungeonGeneration : MonoBehaviour
         // if not vertical, then cut the room horizontally
         else
         {
-            int height = random.Next(minSize, toSplit.height - minSize);
+            int height = _random.Next(minSize, toSplit.height - minSize);
 
             splitRoomA.roomDimensions = new(toSplit.x, toSplit.y, toSplit.width, height + 1);
             splitRoomB.roomDimensions = new(toSplit.x, toSplit.y + height, toSplit.width, toSplit.height - height);
@@ -247,7 +247,7 @@ public class DungeonGeneration : MonoBehaviour
         {
             Room toSplitRoom = toSplitRooms.Pop(0);
 
-            int minSize = random.Next(generationSettings.minRoomSize.x, generationSettings.minRoomSize.y);
+            int minSize = _random.Next(generationSettings.minRoomSize.x, generationSettings.minRoomSize.y);
             //int minSize = 10;
 
             //Debug.Log("minSize:\t" + minSize);
@@ -262,16 +262,7 @@ public class DungeonGeneration : MonoBehaviour
             }
 
             // Get the direction to split the room into.
-            Direction direction;
-
-            if (toSplitRoom.roomDimensions.height >= toSplitRoom.roomDimensions.width)
-            {
-                direction = Direction.Horizontal;
-            }
-            else
-            {
-                direction = Direction.Vertical;
-            }
+            Direction direction = toSplitRoom.roomDimensions.height >= toSplitRoom.roomDimensions.width ? Direction.Horizontal : Direction.Vertical;
 
             SplitRoom(toSplitRoom.roomDimensions, direction, minSize);
 
@@ -287,24 +278,16 @@ public class DungeonGeneration : MonoBehaviour
     /// <returns></returns>
     private IEnumerator RemoveRandomRooms()
     {
-        // Calculate the maximum amount of rooms to remove, clamped between 0 and the amount of rooms to draw so it doesnt accidentally go negative.
+        // Calculate the maximum amount of rooms to remove, clamped between 0 and the amount of rooms to draw so it doesn't accidentally go negative.
         int maxRemovalAmount = (int)(toDrawRooms.Count * (generationSettings.maxRemovalAmount / 100f));
         maxRemovalAmount = Mathf.Clamp(maxRemovalAmount, 0, toDrawRooms.Count);
 
         // Get the amount of rooms to remove, a value between 0 and maxRemovalAmount.
-        int removeAmount;
-        if (generationSettings.removeMaxRooms)
-        {
-            removeAmount = maxRemovalAmount;
-        }
-        else
-        {
-            removeAmount = random.Next(0, maxRemovalAmount);
-        }
+        int removeAmount = generationSettings.removeMaxRooms ? maxRemovalAmount : _random.Next(0, maxRemovalAmount);
 
         for (int i = 0; i < removeAmount; i++)
         {
-            int index = random.Next(0, toDrawRooms.Count);
+            int index = _random.Next(0, toDrawRooms.Count);
             deletedRooms.Add(toDrawRooms.Pop(index));
             yield return new WaitForSeconds(generationSettings.splittingSpeed / 10);
         }
@@ -329,10 +312,9 @@ public class DungeonGeneration : MonoBehaviour
         while (stack.Count > 0)
         {
             Room current = stack.Pop();
-            if (visited.Contains(current)) continue;
+            if (!visited.Add(current)) continue;
 
             // Mark the room as visited.
-            visited.Add(current);
 
             // Add the room to the graph with doors.
             graphWithDoors.AddNode(current);
@@ -374,14 +356,14 @@ public class DungeonGeneration : MonoBehaviour
     {
         if (intersectArea.width < intersectArea.height)
         {
-            intersectArea.y += random.Next(1, intersectArea.height - doorSize - 1);
+            intersectArea.y += _random.Next(1, intersectArea.height - doorSize - 1);
             intersectArea.height = doorSize;
             doors.Add(intersectArea);
             return intersectArea;
         }
         else
         {
-            intersectArea.x += random.Next(1, intersectArea.width - doorSize - 1);
+            intersectArea.x += _random.Next(1, intersectArea.width - doorSize - 1);
             intersectArea.width = doorSize;
             doors.Add(intersectArea);
             return intersectArea;
@@ -397,14 +379,9 @@ public class DungeonGeneration : MonoBehaviour
 
         while (toCheck.Count > 0)
         {
-            if (generationSettings.minimumDoorCreation)
-            {
-                graphs.Add(CreateMinimumDoorGraph(toCheck));
-            }
-            else
-            {
-                graphs.Add(CreateMultipleDoorGraph(toCheck));
-            }
+            graphs.Add(generationSettings.minimumDoorCreation
+                ? CreateMinimumDoorGraph(toCheck)
+                : CreateMultipleDoorGraph(toCheck));
         }
     }
 
@@ -438,8 +415,8 @@ public class DungeonGeneration : MonoBehaviour
         yield return new WaitForSeconds(1);
         yield return StartCoroutine(CreateDoors(highestRoomCountGraphIndex));
 
-        mainGraphIndex = highestRoomCountGraphIndex;
-        mainGraphFound = true;
+        _mainGraphIndex = highestRoomCountGraphIndex;
+        _mainGraphFound = true;
     }
 
     /// <summary>
@@ -484,7 +461,7 @@ public class DungeonGeneration : MonoBehaviour
 
 
 
-        // If the key doesnt exist, then we add it to the connections graph.
+        // If the key doesn't exist, then we add it to the connections graph.
         if (connections.GetNeighbours(connectedRooms[0]) == null)
         {
             connections.AddNode(connectedRooms[0]);
@@ -500,7 +477,7 @@ public class DungeonGeneration : MonoBehaviour
     {
         // Create a graph to store the connections between rooms.
         Graph<Room> connections = new();
-        // Create a list for rooms that have a been added to the connections graph
+        // Create a list for rooms that have been added to the connections graph
         List<Room> connectedRooms = new();
 
         int doorSize = generationSettings.doorSize;
@@ -533,7 +510,7 @@ public class DungeonGeneration : MonoBehaviour
             }
         }
 
-        // If the key doesnt exist, then we add it to the connections graph.
+        // If the key doesn't exist, then we add it to the connections graph.
         if (connections.GetNeighbours(connectedRooms[0]) == null)
         {
             connections.AddNode(connectedRooms[0]);
@@ -541,14 +518,17 @@ public class DungeonGeneration : MonoBehaviour
 
         return connections;
     }
-    #endregion
 
-    #region data classes
+    #endregion Methods
+    #region DataClasses
+    /// <summary>
+    /// Contains settings for dungeon generation.
+    /// </summary>
     [Serializable]
     private class GenerationSettings
     {
         [Tooltip("Seed for the random number generator.")]
-        public int seed = 0;
+        public int seed;
         [Tooltip("The minimum and maximum size of a room.")]
         public Vector2Int minRoomSize = new(10, 10);
         [Tooltip("The size of the doors between rooms.")]
@@ -558,20 +538,28 @@ public class DungeonGeneration : MonoBehaviour
         [Tooltip("This amount max amount of rooms to remove, if removeMaxRooms is set to true, it will remove this percentage of rooms.")]
         [Range(0, 100)] public int maxRemovalAmount = 50;
         [Tooltip("This boolean decides if you remove the exact amount of rooms or a random amount between 0 and the max amount of rooms to remove.")]
-        public bool removeMaxRooms = false;
+        public bool removeMaxRooms;
         [Tooltip("This boolean decides if you want to create the minimum amount of doors between rooms or if doors can have multiple routes to the starting room")]
-        public bool minimumDoorCreation = false;
+        public bool minimumDoorCreation;
     }
 
 
-
+    /// <summary>
+    /// Represents a room in the dungeon.
+    /// </summary>
     [Serializable]
     private class Room
     {
-        public bool isStartingRoom = false;
-        public bool isConnected = false;
+        public bool isStartingRoom;
+        public bool isConnected;
         public RectInt roomDimensions;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Room"/> class.
+        /// </summary>
+        /// <param name="roomDimensions">The dimensions of the room.</param>
+        /// <param name="isConnected">Indicates whether the room is connected to the dungeon graph.</param>
+        /// <param name="isStartingRoom">Indicates whether the room is the starting room.</param>
         public Room(RectInt roomDimensions, bool isConnected = false, bool isStartingRoom = false)
         {
             this.roomDimensions = roomDimensions;
@@ -579,13 +567,13 @@ public class DungeonGeneration : MonoBehaviour
             this.isStartingRoom = isStartingRoom;
         }
     }
-    #endregion data classes
+    #endregion DataClasses
 }
 
 /// <summary>
 /// Enum representing the possible directions for room splitting.
-/// </summary>ec
-enum Direction
+/// </summary>
+internal enum Direction
 {
     Vertical,
     Horizontal

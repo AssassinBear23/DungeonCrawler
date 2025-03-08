@@ -460,7 +460,7 @@ MonoBehaviour:
     seed: 687651687
     minRoomSize: {x: 4, y: 25}
     doorSize: 2
-    splittingSpeed: 0.001
+    actionDelay: 0.2
     maxRemovalAmount: 0
     removeMaxRooms: 0
     minimumDoorCreation: 1

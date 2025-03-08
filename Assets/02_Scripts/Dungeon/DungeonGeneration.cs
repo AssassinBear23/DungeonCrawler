@@ -266,8 +266,7 @@ public class DungeonGeneration : MonoBehaviour
 
             SplitRoom(toSplitRoom.roomDimensions, direction, minSize);
 
-            yield return new WaitForSeconds(generationSettings.splittingSpeed);
-
+            yield return Delay(generationSettings.delaySettings.RoomGeneration);
         }
     }
 
@@ -289,7 +288,7 @@ public class DungeonGeneration : MonoBehaviour
         {
             int index = _random.Next(0, toDrawRooms.Count);
             deletedRooms.Add(toDrawRooms.Pop(index));
-            yield return new WaitForSeconds(generationSettings.splittingSpeed / 10);
+            yield return Delay(generationSettings.delaySettings.RoomRemoval);
         }
     }
 
@@ -336,7 +335,7 @@ public class DungeonGeneration : MonoBehaviour
                     graphWithDoors.AddEdge(current, door);
                     graphWithDoors.AddEdge(door, neighbor);
 
-                    yield return new WaitForSeconds(generationSettings.splittingSpeed / 10);
+                    yield return Delay(generationSettings.delaySettings.DoorCreation);
 
                     stack.Push(neighbor);
                 }
@@ -379,9 +378,14 @@ public class DungeonGeneration : MonoBehaviour
 
         while (toCheck.Count > 0)
         {
-            graphs.Add(generationSettings.minimumDoorCreation
-                ? CreateMinimumDoorGraph(toCheck)
-                : CreateMultipleDoorGraph(toCheck));
+            if (generationSettings.minimumDoorCreation)
+            {
+                graphs.Add(CreateMinimumDoorGraph(toCheck));
+            }
+            else
+            {
+                graphs.Add(CreateMultipleDoorGraph(toCheck));
+            }
         }
     }
 
@@ -412,8 +416,8 @@ public class DungeonGeneration : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(1);
-        yield return StartCoroutine(CreateDoors(highestRoomCountGraphIndex));
+        yield return Delay(generationSettings.delaySettings.GraphFiltering);
+        yield return CreateDoors(highestRoomCountGraphIndex);
 
         _mainGraphIndex = highestRoomCountGraphIndex;
         _mainGraphFound = true;
@@ -457,6 +461,7 @@ public class DungeonGeneration : MonoBehaviour
                 connectedRooms.Add(toCheck.Pop(j));
                 j--;
             }
+             yield return Delay(generationSettings.delaySettings.DoorCreation);
         }
 
 
@@ -519,7 +524,23 @@ public class DungeonGeneration : MonoBehaviour
         return connections;
     }
 
+    private IEnumerator Delay(DelayType delayType)
+    {
+        switch (delayType)
+        {
+            case DelayType.Instant:
+                break;
+            case DelayType.Delayed:
+                yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
+                break;
+            case DelayType.KeyPress:
+                yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+                break;
+        }
+    }
+
     #endregion Methods
+
     #region DataClasses
     /// <summary>
     /// Contains settings for dungeon generation.
@@ -533,16 +554,38 @@ public class DungeonGeneration : MonoBehaviour
         public Vector2Int minRoomSize = new(10, 10);
         [Tooltip("The size of the doors between rooms.")]
         [Range(2, 5)] public int doorSize = 3;
-        [Tooltip("The time between operations.")]
-        [Space(10)] public float splittingSpeed = .5f;
         [Tooltip("This amount max amount of rooms to remove, if removeMaxRooms is set to true, it will remove this percentage of rooms.")]
         [Range(0, 100)] public int maxRemovalAmount = 50;
         [Tooltip("This boolean decides if you remove the exact amount of rooms or a random amount between 0 and the max amount of rooms to remove.")]
         public bool removeMaxRooms;
         [Tooltip("This boolean decides if you want to create the minimum amount of doors between rooms or if doors can have multiple routes to the starting room")]
         public bool minimumDoorCreation;
+        [HorizontalLine]
+        
+        public DelaySettings delaySettings;
     }
 
+    [Serializable]
+    private class DelaySettings
+    {
+        [Tooltip("The time between operations.")]
+        [Range(0.01f, 10f)]
+        public float actionDelay = .5f;
+        [Tooltip("If true, the default delay type will be used for all actions.")]
+        [field: SerializeField] public bool UseDefaultDelayType { get; set; }
+        [ShowIf("UseDefaultDelayType"), Tooltip("The default delay type to use"), AllowNesting]
+        public DelayType defaultDelayType;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType RoomGeneration;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType RoomRemoval;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType GraphCreation;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType GraphFiltering;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType DoorCreation;
+    }
 
     /// <summary>
     /// Represents a room in the dungeon.
@@ -568,6 +611,8 @@ public class DungeonGeneration : MonoBehaviour
         }
     }
     #endregion DataClasses
+
+
 }
 
 /// <summary>
@@ -577,4 +622,20 @@ internal enum Direction
 {
     Vertical,
     Horizontal
+}
+
+internal enum DelayType
+{
+    Instant,
+    Delayed,
+    KeyPress
+}
+
+internal enum DelayAction
+{
+    RoomGeneration,
+    RoomRemoval,
+    GraphCreation,
+    GraphFiltering,
+    DoorCreation
 }

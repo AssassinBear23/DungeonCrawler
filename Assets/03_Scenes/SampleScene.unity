@@ -460,10 +460,18 @@ MonoBehaviour:
     seed: 687651687
     minRoomSize: {x: 4, y: 25}
     doorSize: 2
-    actionDelay: 0.2
     maxRemovalAmount: 0
     removeMaxRooms: 0
     minimumDoorCreation: 1
+    delaySettings:
+      actionDelay: 0.5
+      <UseDefaultDelayType>k__BackingField: 1
+      defaultDelayType: 1
+      RoomGeneration: 1
+      RoomRemoval: 1
+      GraphCreation: 1
+      GraphFiltering: 1
+      DoorCreation: 1
   drawDungeon: 0
   drawDoors: 0
   drawDeletedRooms: 0

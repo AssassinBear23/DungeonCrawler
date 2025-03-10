@@ -370,26 +370,6 @@ public class DungeonGeneration : MonoBehaviour
     }
 
     /// <summary>
-    /// Creates the graph of the dungeon.
-    /// </summary>
-    private void CreateGraph()
-    {
-        List<Room> toCheck = new(toDrawRooms);
-
-        while (toCheck.Count > 0)
-        {
-            if (generationSettings.minimumDoorCreation)
-            {
-                graphs.Add(CreateMinimumDoorGraph(toCheck));
-            }
-            else
-            {
-                graphs.Add(CreateMultipleDoorGraph(toCheck));
-            }
-        }
-    }
-
-    /// <summary>
     /// Filters the graphs to remove any unreachable rooms.
     /// </summary>
     private IEnumerator FilterGraphs()
@@ -423,11 +403,36 @@ public class DungeonGeneration : MonoBehaviour
         _mainGraphFound = true;
     }
 
+
+    /// <summary>
+    /// Creates the graph of the dungeon.
+    /// </summary>
+    private IEnumerator CreateGraph()
+    {
+        List<Room> toCheck = new(toDrawRooms);
+
+        while (toCheck.Count > 0)
+        {
+            if (generationSettings.minimumDoorCreation)
+            {
+                yield return CreateMinimumDoorGraph(toCheck);
+            }
+            else
+            {
+                yield return CreateMultipleDoorGraph(toCheck);
+            }
+        }
+    }
+
     /// <summary>
     /// Creates a graph with multiple doors between rooms.
     /// </summary>
-    private Graph<Room> CreateMultipleDoorGraph(List<Room> toCheck)
+    private IEnumerator CreateMultipleDoorGraph(List<Room> toCheck)
     {
+        /// TODO: Implement the multiple door spawning system. 
+        /// First door is guaranteed to spawn, then the rest are by chance, which lowers with each door added.
+
+
         // Graph to store the connections in
         Graph<Room> connections = new();
         // List 
@@ -461,10 +466,8 @@ public class DungeonGeneration : MonoBehaviour
                 connectedRooms.Add(toCheck.Pop(j));
                 j--;
             }
-             yield return Delay(generationSettings.delaySettings.DoorCreation);
+            yield return Delay(generationSettings.delaySettings.GraphCreation);
         }
-
-
 
         // If the key doesn't exist, then we add it to the connections graph.
         if (connections.GetNeighbours(connectedRooms[0]) == null)
@@ -472,13 +475,13 @@ public class DungeonGeneration : MonoBehaviour
             connections.AddNode(connectedRooms[0]);
         }
 
-        return connections;
+        graphs.Add(connections);
     }
 
     /// <summary>
     /// Creates a graph with the minimum amount of doors between rooms.
     /// </summary>
-    private Graph<Room> CreateMinimumDoorGraph(List<Room> toCheck)
+    private IEnumerator CreateMinimumDoorGraph(List<Room> toCheck)
     {
         // Create a graph to store the connections between rooms.
         Graph<Room> connections = new();
@@ -513,6 +516,7 @@ public class DungeonGeneration : MonoBehaviour
                 connectedRooms.Add(toCheck.Pop(j));
                 j--;
             }
+            yield return Delay(generationSettings.delaySettings.GraphCreation);
         }
 
         // If the key doesn't exist, then we add it to the connections graph.
@@ -521,7 +525,7 @@ public class DungeonGeneration : MonoBehaviour
             connections.AddNode(connectedRooms[0]);
         }
 
-        return connections;
+        graphs.Add(connections);
     }
 
     private IEnumerator Delay(DelayType delayType)
@@ -561,7 +565,7 @@ public class DungeonGeneration : MonoBehaviour
         [Tooltip("This boolean decides if you want to create the minimum amount of doors between rooms or if doors can have multiple routes to the starting room")]
         public bool minimumDoorCreation;
         [HorizontalLine]
-        
+
         public DelaySettings delaySettings;
     }
 

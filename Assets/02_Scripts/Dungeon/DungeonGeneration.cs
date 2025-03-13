@@ -1,5 +1,4 @@
 using NaughtyAttributes;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -204,40 +203,6 @@ public class DungeonGeneration : MonoBehaviour
     }
 
     /// <summary>
-    /// Splits the rooms in the dungeon.
-    /// </summary>
-    /// <param name="toSplit">The room to be split.</param>
-    /// <param name="direction">The direction to split the room.</param>
-    /// <param name="minSize">The minimum size of the split rooms.</param>
-    private void SplitRoom(RectInt toSplit, Direction direction, int minSize)
-    {
-
-        Room splitRoomA = new(RectInt.zero);
-        Room splitRoomB = new(RectInt.zero);
-
-        // If the direction decided was vertical, then cut the room vertically
-        if (direction == Direction.Vertical)
-        {
-            int width = _random.Next(minSize, toSplit.width - minSize);
-
-            splitRoomA.roomDimensions = new(toSplit.x, toSplit.y, width + 1, toSplit.height);
-            splitRoomB.roomDimensions = new(toSplit.x + width, toSplit.y, toSplit.width - width, toSplit.height);
-            toSplitRooms.Add(splitRoomA);
-            toSplitRooms.Add(splitRoomB);
-        }
-        // if not vertical, then cut the room horizontally
-        else
-        {
-            int height = _random.Next(minSize, toSplit.height - minSize);
-
-            splitRoomA.roomDimensions = new(toSplit.x, toSplit.y, toSplit.width, height + 1);
-            splitRoomB.roomDimensions = new(toSplit.x, toSplit.y + height, toSplit.width, toSplit.height - height);
-            toSplitRooms.Add(splitRoomA);
-            toSplitRooms.Add(splitRoomB);
-        }
-    }
-
-    /// <summary>
     /// Coroutine that splits the rooms in the dungeon.
     /// </summary>
     /// <returns>IEnumerator for coroutine.</returns>
@@ -266,7 +231,41 @@ public class DungeonGeneration : MonoBehaviour
 
             SplitRoom(toSplitRoom.roomDimensions, direction, minSize);
 
-            yield return Delay(generationSettings.delaySettings.RoomGeneration);
+            yield return new WaitForSeconds(generationSettings.splittingSpeed);
+        }
+
+        /// <summary>
+        /// Splits the rooms in the dungeon.
+        /// </summary>
+        /// <param name="toSplit">The room to be split.</param>
+        /// <param name="direction">The direction to split the room.</param>
+        /// <param name="minSize">The minimum size of the split rooms.</param>
+        void SplitRoom(RectInt toSplit, Direction direction, int minSize)
+        {
+
+            Room splitRoomA = new(RectInt.zero);
+            Room splitRoomB = new(RectInt.zero);
+
+            // If the direction decided was vertical, then cut the room vertically
+            if (direction == Direction.Vertical)
+            {
+                int width = _random.Next(minSize, toSplit.width - minSize);
+
+                splitRoomA.roomDimensions = new(toSplit.x, toSplit.y, width + 1, toSplit.height);
+                splitRoomB.roomDimensions = new(toSplit.x + width, toSplit.y, toSplit.width - width, toSplit.height);
+                toSplitRooms.Add(splitRoomA);
+                toSplitRooms.Add(splitRoomB);
+            }
+            // if not vertical, then cut the room horizontally
+            else
+            {
+                int height = _random.Next(minSize, toSplit.height - minSize);
+
+                splitRoomA.roomDimensions = new(toSplit.x, toSplit.y, toSplit.width, height + 1);
+                splitRoomB.roomDimensions = new(toSplit.x, toSplit.y + height, toSplit.width, toSplit.height - height);
+                toSplitRooms.Add(splitRoomA);
+                toSplitRooms.Add(splitRoomB);
+            }
         }
     }
 
@@ -544,79 +543,6 @@ public class DungeonGeneration : MonoBehaviour
     }
 
     #endregion Methods
-
-    #region DataClasses
-    /// <summary>
-    /// Contains settings for dungeon generation.
-    /// </summary>
-    [Serializable]
-    private class GenerationSettings
-    {
-        [Tooltip("Seed for the random number generator.")]
-        public int seed;
-        [Tooltip("The minimum and maximum size of a room.")]
-        public Vector2Int minRoomSize = new(10, 10);
-        [Tooltip("The size of the doors between rooms.")]
-        [Range(2, 5)] public int doorSize = 3;
-        [Tooltip("This amount max amount of rooms to remove, if removeMaxRooms is set to true, it will remove this percentage of rooms.")]
-        [Range(0, 100)] public int maxRemovalAmount = 50;
-        [Tooltip("This boolean decides if you remove the exact amount of rooms or a random amount between 0 and the max amount of rooms to remove.")]
-        public bool removeMaxRooms;
-        [Tooltip("This boolean decides if you want to create the minimum amount of doors between rooms or if doors can have multiple routes to the starting room")]
-        public bool minimumDoorCreation;
-        [HorizontalLine]
-
-        public DelaySettings delaySettings;
-    }
-
-    [Serializable]
-    private class DelaySettings
-    {
-        [Tooltip("The time between operations.")]
-        [Range(0.01f, 10f)]
-        public float actionDelay = .5f;
-        [Tooltip("If true, the default delay type will be used for all actions.")]
-        [field: SerializeField] public bool UseDefaultDelayType { get; set; }
-        [ShowIf("UseDefaultDelayType"), Tooltip("The default delay type to use"), AllowNesting]
-        public DelayType defaultDelayType;
-        [HideIf("UseDefaultDelayType"), AllowNesting]
-        public DelayType RoomGeneration;
-        [HideIf("UseDefaultDelayType"), AllowNesting]
-        public DelayType RoomRemoval;
-        [HideIf("UseDefaultDelayType"), AllowNesting]
-        public DelayType GraphCreation;
-        [HideIf("UseDefaultDelayType"), AllowNesting]
-        public DelayType GraphFiltering;
-        [HideIf("UseDefaultDelayType"), AllowNesting]
-        public DelayType DoorCreation;
-    }
-
-    /// <summary>
-    /// Represents a room in the dungeon.
-    /// </summary>
-    [Serializable]
-    private class Room
-    {
-        public bool isStartingRoom;
-        public bool isConnected;
-        public RectInt roomDimensions;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Room"/> class.
-        /// </summary>
-        /// <param name="roomDimensions">The dimensions of the room.</param>
-        /// <param name="isConnected">Indicates whether the room is connected to the dungeon graph.</param>
-        /// <param name="isStartingRoom">Indicates whether the room is the starting room.</param>
-        public Room(RectInt roomDimensions, bool isConnected = false, bool isStartingRoom = false)
-        {
-            this.roomDimensions = roomDimensions;
-            this.isConnected = isConnected;
-            this.isStartingRoom = isStartingRoom;
-        }
-    }
-    #endregion DataClasses
-
-
 }
 
 /// <summary>

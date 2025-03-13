@@ -455,21 +455,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dungeonSize: {x: 100, y: 400}
+  dungeonSize: {x: 100, y: 100}
   generationSettings:
     seed: 687651687
-    minRoomSize: {x: 4, y: 25}
+    minRoomSize: {x: 4, y: 10}
     doorSize: 2
+    useSelfMadeOrder: 0
     maxRemovalAmount: 0
     removeMaxRooms: 0
     minimumDoorCreation: 1
     delaySettings:
-      actionDelay: 0.5
-      <UseDefaultDelayType>k__BackingField: 1
-      defaultDelayType: 1
-      RoomGeneration: 1
-      RoomRemoval: 1
-      GraphCreation: 1
+      actionDelay: 0.01
+      <UseDefaultDelayType>k__BackingField: 0
+      defaultDelayType: 0
+      RoomGeneration: 0
+      RoomRemoval: 2
+      GraphCreation: 2
       GraphFiltering: 1
       DoorCreation: 1
   drawDungeon: 0

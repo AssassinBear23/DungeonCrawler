@@ -1,50 +1,91 @@
-﻿using System;
+﻿using NaughtyAttributes;
+using System;
 using UnityEngine;
 
-
-/// <summary>
-/// Represents a room in the dungeon.
-/// </summary>
-[Serializable]
-public class Room
+namespace Dungeon.DataStructures
 {
-    public bool isStartingRoom;
-    public bool isConnected;
-    public RectInt roomDimensions;
+    /// <summary>
+    /// Represents a room in the dungeon.
+    /// </summary>
+    [Serializable]
+    public class Room
+    {
+        public bool isStartingRoom;
+        public bool isConnected;
+        public RectInt roomDimensions;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Room"/> class.
+        /// </summary>
+        /// <param name="roomDimensions">The dimensions of the room.</param>
+        /// <param name="isConnected">Indicates whether the room is connected to the dungeon graph.</param>
+        /// <param name="isStartingRoom">Indicates whether the room is the starting room.</param>
+        public Room(RectInt roomDimensions, bool isConnected = false, bool isStartingRoom = false)
+        {
+            this.roomDimensions = roomDimensions;
+            this.isConnected = isConnected;
+            this.isStartingRoom = isStartingRoom;
+        }
+    }
+
+    [Serializable]
+    public class DelaySettings
+    {
+        [Tooltip("The time between operations.")]
+        [Range(0.01f, 10f)]
+        public float actionDelay = .5f;
+        [Tooltip("If true, the default delay type will be used for all actions.")]
+        [field: SerializeField] public bool UseDefaultDelayType { get; set; }
+        [ShowIf("UseDefaultDelayType"), Tooltip("The default delay type to use"), AllowNesting]
+        public DelayType defaultDelayType;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType RoomGeneration;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType RoomRemoval;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType GraphCreation;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType GraphFiltering;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType DoorCreation;
+    }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Room"/> class.
+    /// Contains settings for dungeon generation.
     /// </summary>
-    /// <param name="roomDimensions">The dimensions of the room.</param>
-    /// <param name="isConnected">Indicates whether the room is connected to the dungeon graph.</param>
-    /// <param name="isStartingRoom">Indicates whether the room is the starting room.</param>
-    public Room(RectInt roomDimensions, bool isConnected = false, bool isStartingRoom = false)
+    [Serializable]
+    public class GenerationSettings
     {
-        this.roomDimensions = roomDimensions;
-        this.isConnected = isConnected;
-        this.isStartingRoom = isStartingRoom;
+        [Tooltip("Seed for the random number generator.")]
+        public int seed;
+        [Tooltip("The minimum and maximum size of a room.")]
+        public Vector2Int minRoomSize = new(10, 10);
+        [Tooltip("The size of the doors between rooms.")]
+        [Range(2, 5)] public int doorSize = 3;
+        [Tooltip("")]
+        public bool useSelfMadeOrder;
+        [Tooltip("This amount max amount of rooms to remove, if removeMaxRooms is set to true, it will remove this percentage of rooms.")]
+        [AllowNesting, ShowIf("useSelfMadeOrder"), Range(0, 100)] public int maxRemovalAmount = 50;
+        [Tooltip("This boolean decides if you remove the exact amount of rooms or a random amount between 0 and the max amount of rooms to remove.")]
+        [AllowNesting, ShowIf("useSelfMadeOrder")] public bool removeMaxRooms;
+        [Tooltip("This boolean decides if you want to create the minimum amount of doors between rooms or if doors can have multiple routes to the starting room")]
+        [AllowNesting, ShowIf("useSelfMadeOrder")] public bool minimumDoorCreation;
+        [HorizontalLine]
+        public DelaySettings delaySettings;
+    }
+    public enum DelayAction
+    {
+        RoomGeneration,
+        RoomRemoval,
+        GraphCreation,
+        GraphFiltering,
+        DoorCreation
+    }
+
+    public enum DelayType
+    {
+        Instant,
+        Delayed,
+        KeyPress
     }
 }
-
-/// <summary>
-/// Contains settings for dungeon generation.
-/// </summary>
-[Serializable]
-public class GenerationSettings
-{
-    [Tooltip("Seed for the random number generator.")]
-    public int seed;
-    [Tooltip("The minimum and maximum size of a room.")]
-    public Vector2Int minRoomSize = new(10, 10);
-    [Tooltip("The size of the doors between rooms.")]
-    [Range(2, 5)] public int doorSize = 3;
-    [Tooltip("The time between operations.")]
-    [Space(10)] public float splittingSpeed = .5f;
-    [Tooltip("This amount max amount of rooms to remove, if removeMaxRooms is set to true, it will remove this percentage of rooms.")]
-    [Range(0, 100)] public int maxRemovalAmount = 50;
-    [Tooltip("This boolean decides if you remove the exact amount of rooms or a random amount between 0 and the max amount of rooms to remove.")]
-    public bool removeMaxRooms;
-    [Tooltip("This boolean decides if you want to create the minimum amount of doors between rooms or if doors can have multiple routes to the starting room")]
-    public bool minimumDoorCreation;
-}
-

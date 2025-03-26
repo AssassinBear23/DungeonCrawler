@@ -79,4 +79,22 @@ public class Graph<T>
     {
         return adjacencies.Keys.ToList();
     }
+
+    /// <summary>
+    /// Removes a node from the graph.
+    /// </summary>
+    /// <param name="toRemoveNode">The node to remove from the graph</param>
+    public void RemoveNode(T toRemoveNode)
+    {
+        if (!adjacencies.ContainsKey(toRemoveNode))
+        {
+            Debug.Log("Node does not exist in graph");
+            return;
+        }
+        foreach (var neighbour in adjacencies[toRemoveNode])
+        {
+            adjacencies[neighbour].Remove(toRemoveNode);
+        }
+        adjacencies.Remove(toRemoveNode);
+    }
 }

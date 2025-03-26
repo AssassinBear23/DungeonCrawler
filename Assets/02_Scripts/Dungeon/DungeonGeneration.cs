@@ -327,6 +327,9 @@ namespace Dungeon.Generation
             // Sorting the list using LINQ, in order of size, smallest to largest.
             List<Room> orderedRooms = toDrawRooms.OrderBy(x => x.roomDimensions.width * x.roomDimensions.height).ToList();
 
+            
+
+            yield return Delay(generationSettings.delaySettings.RoomRemoval);
         }
 
         /// <summary>
@@ -466,10 +469,6 @@ namespace Dungeon.Generation
         /// </summary>
         private IEnumerator CreateMultipleDoorGraph(List<Room> toCheck)
         {
-            /// TODO: Implement the multiple door spawning system. 
-            /// First door is guaranteed to spawn, then the rest are by chance, which lowers with each door added.
-
-
             // Graph to store the connections in
             Graph<Room> connections = new();
             // List 
@@ -480,7 +479,6 @@ namespace Dungeon.Generation
             // Add the first room to the graph.
             connectedRooms.Add(toCheck.Pop(0));
             connectedRooms[0].isStartingRoom = true;
-            connectedRooms[0].isConnected = true;
 
             for (int i = 0; i < connectedRooms.Count; i++)
             {

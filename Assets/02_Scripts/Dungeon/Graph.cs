@@ -81,20 +81,57 @@ public class Graph<T>
     }
 
     /// <summary>
-    /// Removes a node from the graph.
+    /// Tries to remove a node from the graph. If it splits the graph apart, stop the removal.
     /// </summary>
-    /// <param name="toRemoveNode">The node to remove from the graph</param>
-    public void RemoveNode(T toRemoveNode)
+    /// <param name="nodeToRemove">The node to remove</param>
+    /// <returns>True if the room was removed, false if it would split the graph.</returns>
+    public bool TryRemoveNode(T nodeToRemove, T startingNode)
     {
-        if (!adjacencies.ContainsKey(toRemoveNode))
+        if (!adjacencies.ContainsKey(nodeToRemove))
         {
-            Debug.Log("Node does not exist in graph");
-            return;
+            return false;
         }
-        foreach (var neighbour in adjacencies[toRemoveNode])
+
+        // Perform DFS to check connectivity
+        HashSet<T> visited = new();
+        if (startingNode == null)
         {
-            adjacencies[neighbour].Remove(toRemoveNode);
+            return false;
         }
-        adjacencies.Remove(toRemoveNode);
+
+        Stack<T> stack = new();
+        stack.Push(startingNode);
+
+        while (stack.Count > 0)
+        {
+            T current = stack.Pop();
+            if (!visited.Add(current))
+            {
+                continue;
+            }
+
+            foreach (T neighbor in adjacencies[current])
+            {
+                if (!neighbor.Equals(nodeToRemove) && !visited.Contains(neighbor))
+                {
+                    stack.Push(neighbor);
+                }
+            }
+        }
+
+        // Check if all nodes except the room to remove are visited
+        if (visited.Count != adjacencies.Count - 1)
+        {
+            return false;
+        }
+
+        // Remove the room and its references
+        foreach (T neighbor in adjacencies[nodeToRemove])
+        {
+            adjacencies[neighbor].Remove(nodeToRemove);
+        }
+        adjacencies.Remove(nodeToRemove);
+
+        return true;
     }
 }

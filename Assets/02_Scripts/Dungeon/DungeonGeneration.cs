@@ -53,12 +53,8 @@ namespace Dungeon.Generation
         private IEnumerator Start()
         {
             Reset();
-
             _random = new Random(generationSettings.seed);
             CreateOuterBounds();
-            if (generationSettings.useSelfMadeOrder)
-                yield return StartCoroutine(OwnOrder());
-            else
                 yield return StartCoroutine(AssignementOrder());
         }
 
@@ -66,20 +62,11 @@ namespace Dungeon.Generation
         {
             yield return SplitRooms();
             yield return new WaitForSeconds(1);
-            yield return CreateGraph();
+            yield return StartCoroutine(CreateGraph());
             yield return new WaitForSeconds(1);
-            yield return RemoveSmallestRooms();
-        }
-
-        private IEnumerator OwnOrder()
-        {
+            yield return StartCoroutine(RemoveRooms());
             yield return new WaitForSeconds(1);
-            yield return SplitRooms();
-            yield return new WaitForSeconds(1);
-            yield return RemoveRandomRooms();
-            yield return new WaitForSeconds(1);
-            yield return CreateGraph();
-            yield return FilterGraphs();
+            yield return StartCoroutine(CreateDoors());
         }
 
         /// <summary>
@@ -292,33 +279,11 @@ namespace Dungeon.Generation
             }
         }
 
-
-        /// <summary>
-        /// Coroutine that removes a random amount of rooms from the dungeon.
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerator RemoveRandomRooms()
-        {
-            // Calculate the maximum amount of rooms to remove, clamped between 0 and the amount of rooms to draw so it doesn't accidentally go negative.
-            int maxRemovalAmount = (int)(toDrawRooms.Count * (generationSettings.maxRemovalAmount / 100f));
-            maxRemovalAmount = Mathf.Clamp(maxRemovalAmount, 0, toDrawRooms.Count);
-
-            // Get the amount of rooms to remove, a value between 0 and maxRemovalAmount.
-            int removeAmount = generationSettings.removeMaxRooms ? maxRemovalAmount : _random.Next(0, maxRemovalAmount);
-
-            for (int i = 0; i < removeAmount; i++)
-            {
-                int index = _random.Next(0, toDrawRooms.Count);
-                deletedRooms.Add(toDrawRooms.Pop(index));
-                yield return Delay(generationSettings.delaySettings.RoomRemoval);
-            }
-        }
-
         /// <summary>
         /// Removes the smallest rooms from the dungeon until 10% of the rooms are removed or the dungeon is about to be disconnected.
         /// </summary>
         /// <returns>IEnumerator for coroutine.</returns>
-        private IEnumerator RemoveSmallestRooms()
+        private IEnumerator RemoveRooms()
         {
             /// TODO:
             /// - Profile the system to see how fast linq is, and then make a attempt to do it myself. Profile self-made system to see if it is faster.
@@ -410,157 +375,45 @@ namespace Dungeon.Generation
         }
 
         /// <summary>
-        /// Filters the graphs to remove any unreachable rooms.
-        /// </summary>
-        private IEnumerator FilterGraphs()
-        {
-            int highestRoomCountGraphIndex = 0;
-
-            for (int i = 0; i < graphs.Count; i++)
-            {
-                if (graphs[i].GetNodeCount() >= graphs[highestRoomCountGraphIndex].GetNodeCount())
-                {
-                    highestRoomCountGraphIndex = i;
-                }
-            }
-
-            for (int i = 0; i < graphs.Count; i++)
-            {
-                if (i == highestRoomCountGraphIndex) continue;
-
-                List<Room> rooms = graphs[i].GetNodes();
-
-                foreach (Room room in rooms)
-                {
-                    unreachableRooms.Add(toDrawRooms.Pop(toDrawRooms.IndexOf(room)));
-                }
-            }
-
-            yield return Delay(generationSettings.delaySettings.GraphFiltering);
-            yield return CreateDoors(highestRoomCountGraphIndex);
-
-            _mainGraphIndex = highestRoomCountGraphIndex;
-            _mainGraphFound = true;
-        }
-
-
-        /// <summary>
         /// Creates the graph of the dungeon.
         /// </summary>
         private IEnumerator CreateGraph()
         {
             List<Room> toCheck = new(toDrawRooms);
-
-            while (toCheck.Count > 0)
-            {
-                if (generationSettings.minimumDoorCreation)
-                {
-                    yield return CreateMinimumDoorGraph(toCheck);
-                }
-                else
-                {
-                    yield return CreateMultipleDoorGraph(toCheck);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Creates a graph with multiple doors between rooms.
-        /// </summary>
-        private IEnumerator CreateMultipleDoorGraph(List<Room> toCheck)
-        {
             // Graph to store the connections in
             Graph<Room> connections = new();
-            // List 
-            List<Room> connectedRooms = new();
 
             int doorSize = generationSettings.doorSize;
 
-            // Add the first room to the graph.
-            connectedRooms.Add(toCheck.Pop(0));
-            connectedRooms[0].isStartingRoom = true;
 
-            for (int i = 0; i < connectedRooms.Count; i++)
+            for (int i = 0; i < toCheck.Count; i++)
             {
                 for (int j = 0; j < toCheck.Count; j++)
                 {
                     // If the rooms do not intersect or are the same room, continue.
-                    if (!AlgorithmsUtils.Intersects(connectedRooms[i].roomDimensions, toCheck[j].roomDimensions)
-                        || connectedRooms[i].roomDimensions == toCheck[j].roomDimensions) continue;
+                    if (!AlgorithmsUtils.Intersects(toCheck[i].roomDimensions, toCheck[j].roomDimensions)
+                        || i == j) continue;
 
-                    RectInt intersectArea = AlgorithmsUtils.Intersect(connectedRooms[i].roomDimensions, toCheck[j].roomDimensions);
+                    RectInt intersectArea = AlgorithmsUtils.Intersect(toCheck[i].roomDimensions, toCheck[j].roomDimensions);
 
                     // If the intersect area is too small to place a door, continue.
                     if (intersectArea.width < doorSize + 2 && intersectArea.height < doorSize + 2) continue;
 
-                    connections.AddNode(connectedRooms[i]);
+                    connections.AddNode(toCheck[i]);
                     connections.AddNode(toCheck[j]);
 
-                    connections.AddEdge(connectedRooms[i], toCheck[j]);
-
-                    connectedRooms.Add(toCheck.Pop(j));
-                    j--;
+                    connections.AddEdge(toCheck[i], toCheck[j]);
                 }
                 yield return Delay(generationSettings.delaySettings.GraphCreation);
             }
 
             // If the key doesn't exist, then we add it to the connections graph.
-            if (connections.GetNeighbours(connectedRooms[0]) == null)
+            if (connections.GetNeighbours(toCheck[0]) == null)
             {
-                connections.AddNode(connectedRooms[0]);
+                connections.AddNode(toCheck[0]);
             }
 
-            graphs.Add(connections);
-        }
-
-        /// <summary>
-        /// Creates a graph with the minimum amount of doors between rooms.
-        /// </summary>
-        private IEnumerator CreateMinimumDoorGraph(List<Room> toCheck)
-        {
-            // Create a graph to store the connections between rooms.
-            Graph<Room> connections = new();
-            // Create a list for rooms that have been added to the connections graph
-            List<Room> connectedRooms = new();
-
-            int doorSize = generationSettings.doorSize;
-
-            // Add the first room to the graph.
-            connectedRooms.Add(toCheck.Pop(0));
-            connectedRooms[0].isStartingRoom = true;
-            connectedRooms[0].isConnected = true;
-
-            for (int i = 0; i < connectedRooms.Count; i++)
-            {
-                for (int j = 0; j < toCheck.Count; j++)
-                {
-                    // If the rooms do not intersect or are the same room, continue.
-                    if (!AlgorithmsUtils.Intersects(connectedRooms[i].roomDimensions, toCheck[j].roomDimensions)
-                        || connectedRooms[i].roomDimensions == toCheck[j].roomDimensions) continue;
-
-                    RectInt intersectArea = AlgorithmsUtils.Intersect(connectedRooms[i].roomDimensions, toCheck[j].roomDimensions);
-
-                    // If the intersect area is too small to place a door, continue.
-                    if (intersectArea.width < doorSize + 2 && intersectArea.height < doorSize + 2) continue;
-
-                    connections.AddNode(connectedRooms[i]);
-                    connections.AddNode(toCheck[j]);
-
-                    connections.AddEdge(connectedRooms[i], toCheck[j]);
-
-                    connectedRooms.Add(toCheck.Pop(j));
-                    j--;
-                }
-                yield return Delay(generationSettings.delaySettings.GraphCreation);
-            }
-
-            // If the key doesn't exist, then we add it to the connections graph.
-            if (connections.GetNeighbours(connectedRooms[0]) == null)
-            {
-                connections.AddNode(connectedRooms[0]);
-            }
-
-            graphs.Add(connections);
+            mainGraph = connections;
         }
 
         /// <summary>

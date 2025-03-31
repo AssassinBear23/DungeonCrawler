@@ -62,14 +62,6 @@ namespace Dungeon.DataStructures
         public Vector2Int minRoomSize = new(10, 10);
         [Tooltip("The size of the doors between rooms.")]
         [Range(2, 5)] public int doorSize = 3;
-        [Tooltip("")]
-        public bool useSelfMadeOrder;
-        [Tooltip("This amount max amount of rooms to remove, if removeMaxRooms is set to true, it will remove this percentage of rooms.")]
-        [AllowNesting, ShowIf("useSelfMadeOrder"), Range(0, 100)] public int maxRemovalAmount = 50;
-        [Tooltip("This boolean decides if you remove the exact amount of rooms or a random amount between 0 and the max amount of rooms to remove.")]
-        [AllowNesting, ShowIf("useSelfMadeOrder")] public bool removeMaxRooms;
-        [Tooltip("This boolean decides if you want to create the minimum amount of doors between rooms or if doors can have multiple routes to the starting room")]
-        [AllowNesting, ShowIf("useSelfMadeOrder")] public bool minimumDoorCreation;
         [HorizontalLine]
         public DelaySettings delaySettings;
     }

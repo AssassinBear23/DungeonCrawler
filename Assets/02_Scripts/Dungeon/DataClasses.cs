@@ -11,7 +11,6 @@ namespace Dungeon.DataStructures
     public class Room
     {
         public bool isStartingRoom;
-        public bool isConnected;
         public RectInt roomDimensions;
 
         /// <summary>
@@ -23,7 +22,6 @@ namespace Dungeon.DataStructures
         public Room(RectInt roomDimensions, bool isConnected = false, bool isStartingRoom = false)
         {
             this.roomDimensions = roomDimensions;
-            this.isConnected = isConnected;
             this.isStartingRoom = isStartingRoom;
         }
     }

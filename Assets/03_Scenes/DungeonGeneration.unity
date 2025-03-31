@@ -455,24 +455,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dungeonSize: {x: 300, y: 300}
+  dungeonSize: {x: 500, y: 500}
   generationSettings:
     seed: 687651687
-    minRoomSize: {x: 20, y: 30}
-    doorSize: 3
+    minRoomSize: {x: 10, y: 30}
+    doorSize: 2
     delaySettings:
       actionDelay: 0.01
       <UseDefaultDelayType>k__BackingField: 1
       defaultDelayType: 0
       RoomGeneration: 0
-      RoomRemoval: 2
-      GraphCreation: 2
-      GraphFiltering: 1
-      DoorCreation: 1
+      RoomRemoval: 0
+      GraphCreation: 0
+      GraphFiltering: 0
+      DoorCreation: 2
   drawDungeon: 1
   drawDoors: 1
-  drawDeletedRooms: 1
-  drawUnreachableRooms: 1
+  drawDeletedRooms: 0
+  drawUnreachableRooms: 0
   drawStarterRoom: 1
   drawGraph: 1
   toSplitRooms: []
@@ -480,7 +480,9 @@ MonoBehaviour:
   deletedRooms: []
   unreachableRooms: []
   doors: []
-  graphs: []
+  mainGraph:
+    adjacencies:
+      _serializedList: []
 --- !u!4 &1564286927
 Transform:
   m_ObjectHideFlags: 0

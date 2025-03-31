@@ -9,10 +9,6 @@ namespace Dungeon.Generation
     using System;
     using System.Linq;
 
-    /// TODO: 
-    /// - Rework the RemoveRandomRooms method to remove 10% of the rooms, smallest first. Stopping if it disconnects the dungeon
-    /// - Rework the system so a graph is made BEFORE removing rooms, then remove rooms until before the graph is fully disconnected.
-
     /// <summary>
     /// Class thats responsible for generating a dungeon. It makes use of <see cref="Room">Room</see> and <see cref="Graph{T}">Graph</see> classes.
     /// <para> Settings set in <see cref="GenerationSettings"> Generation Settings</see></para>
@@ -37,11 +33,8 @@ namespace Dungeon.Generation
         [SerializeField] private List<Room> deletedRooms = new();
         [SerializeField] private List<Room> unreachableRooms = new();
         [SerializeField] private List<RectInt> doors = new();
-        [SerializeField] private List<Graph<Room>> graphs = new();
+        [SerializeField] private Graph<Room> mainGraph = new();
         [HorizontalLine(height: 1)]
-
-        private int _mainGraphIndex;
-        private bool _mainGraphFound;
 
         private Random _random;
 
@@ -79,11 +72,8 @@ namespace Dungeon.Generation
             deletedRooms.Clear();
             unreachableRooms.Clear();
             doors.Clear();
-            graphs.Clear();
-            _mainGraphFound = false;
-            _mainGraphIndex = 0;
+            mainGraph = new();
         }
-
 
         /// <summary>
         /// Updates the dungeon visualization every frame.
@@ -147,9 +137,9 @@ namespace Dungeon.Generation
                     if (room.isStartingRoom) AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.magenta);
                 }
             }
-            if (drawGraph && _mainGraphFound)
+            if (drawGraph)
             {
-                if (graphs.Count == 0) return;
+                if (mainGraph.GetNodeCount() == 0) return;
                 VisualizeGraph();
             }
         }
@@ -162,7 +152,7 @@ namespace Dungeon.Generation
             // List to keep track of rooms that have been visualized.
             Dictionary<Room, List<Room>> visualizedRoomPairs = new();
 
-            Graph<Room> graph = graphs[_mainGraphIndex];
+            Graph<Room> graph = mainGraph;
 
             List<Room> rooms = graph.GetNodes();
 
@@ -223,9 +213,6 @@ namespace Dungeon.Generation
                 Room toSplitRoom = toSplitRooms.Pop(0);
 
                 int minSize = _random.Next(generationSettings.minRoomSize.x, generationSettings.minRoomSize.y);
-                //int minSize = 10;
-
-                //Debug.Log("minSize:\t" + minSize);
 
                 Debug.Log("Currently want to split " + toSplitRoom);
 
@@ -252,7 +239,6 @@ namespace Dungeon.Generation
             /// <param name="minSize">The minimum size of the split rooms.</param>
             void SplitRoom(RectInt toSplit, Direction direction, int minSize)
             {
-
                 Room splitRoomA = new(RectInt.zero);
                 Room splitRoomB = new(RectInt.zero);
 
@@ -285,16 +271,21 @@ namespace Dungeon.Generation
         /// <returns>IEnumerator for coroutine.</returns>
         private IEnumerator RemoveRooms()
         {
-            /// TODO:
-            /// - Profile the system to see how fast linq is, and then make a attempt to do it myself. Profile self-made system to see if it is faster.
-            ///   If it is faster then the LINQ system, then keep the self-made system.
-
             // Sorting the list using LINQ, in order of size, smallest to largest.
             List<Room> orderedRooms = toDrawRooms.OrderBy(x => x.roomDimensions.width * x.roomDimensions.height).ToList();
+            int amountOfRoomsToRemove = Mathf.CeilToInt(orderedRooms.Count * 0.1f);
 
-            
-
+            for (int i = 0; i < amountOfRoomsToRemove; i++)
+            {
+                Room roomToRemove = orderedRooms[i];
+                if (!mainGraph.TryRemoveNode(roomToRemove, toDrawRooms[0]))
+                {
+                    break;
+                }
+                deletedRooms.Add(roomToRemove);
+                toDrawRooms.Remove(roomToRemove);
             yield return Delay(generationSettings.delaySettings.RoomRemoval);
+        }
         }
 
         /// <summary>

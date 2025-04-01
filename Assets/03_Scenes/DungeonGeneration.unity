@@ -455,10 +455,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dungeonSize: {x: 500, y: 500}
+  dungeonSize: {x: 100, y: 100}
   generationSettings:
     seed: 687651687
-    minRoomSize: {x: 10, y: 30}
+    minRoomSize: {x: 6, y: 10}
     doorSize: 2
     delaySettings:
       actionDelay: 0.01

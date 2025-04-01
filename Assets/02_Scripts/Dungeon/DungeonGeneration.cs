@@ -59,7 +59,7 @@ namespace Dungeon.Generation
             yield return new WaitForSeconds(1);
             yield return StartCoroutine(RemoveRooms());
             yield return new WaitForSeconds(1);
-            yield return StartCoroutine(CreateDoorsDFS());
+            yield return StartCoroutine(CreateDoors());
         }
 
         /// <summary>
@@ -289,26 +289,30 @@ namespace Dungeon.Generation
         }
 
         /// <summary>
-        /// Builds the doors between rooms using Depth-First Search (DFS) to ensure each door is created only once.
+        /// Builds the doors between rooms using spanning-tree algorithm to ensure each door is created only once.
         /// </summary>
-        private IEnumerator CreateDoorsDFS()
+        private IEnumerator CreateDoors()
         {
             Graph<Room> startGraph = mainGraph;             // A copy of the mainGraph.
             Graph<Room> graphWithDoors = new();             // The new graph that will replace the old one, containing the door connections.
             List<Room> rooms = startGraph.GetNodes();       // The rooms in the graph
             HashSet<Room> visited = new();
-            Stack<Room> stack = new();
+            //Stack<Room> stack = new();
+            Queue<Room> queue = new();
             int doorSize = generationSettings.doorSize;     // The door size to use
 
             if (rooms.Count == 0) yield break;              // If there are no rooms then stop
 
+            //rooms[0].isConnected = true;
             rooms[0].isStartingRoom = true;
-            //visited.Add(rooms[0]);                          // Add the first room to the visited set
-            stack.Push(rooms[0]);                           // Pop the first room onto the stack
+            visited.Add(rooms[0]);                        // Add the first room to the visited set
+            //stack.Push(rooms[0]);                         // Pop the first room onto the stack
+            queue.Enqueue(rooms[0]);
 
-            while (stack.Count > 0)
+            while (queue.Count > 0)
             {
-                Room current = stack.Pop();                 // Current room becomes the first on the 
+                Room current = queue.Dequeue();             // Current room becomes the first on the 
+                //if (visited.Contains(current)) continue;
                 //visited.Add(current);                       // Add the room to the visited set
                 graphWithDoors.AddNode(current);            // Add the room to the graph with doors.
 
@@ -329,9 +333,11 @@ namespace Dungeon.Generation
                     graphWithDoors.AddEdge(current, door);
                     graphWithDoors.AddEdge(door, neighbor);
 
-                    stack.Push(neighbor);
+                    //neighbor.isConnected = true;
+                    queue.Enqueue(neighbor);
                     visited.Add(neighbor);
                 }
+
                 yield return Delay(generationSettings.delaySettings.DoorCreation);
             }
 

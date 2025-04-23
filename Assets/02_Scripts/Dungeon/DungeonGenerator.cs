@@ -13,7 +13,7 @@ namespace Dungeon.Generation
     /// Class thats responsible for generating a dungeon. It makes use of <see cref="Room">Room</see> and <see cref="Graph{T}">Graph</see> classes.
     /// <para> Settings set in <see cref="GenerationSettings"> Generation Settings</see></para>
     /// </summary>
-    public class DungeonGeneration : MonoBehaviour
+    public class DungeonGenerator : MonoBehaviour
     {
         [Header("Dungeon Settings")]
         [SerializeField] private Vector2Int dungeonSize = new(100, 100);
@@ -52,17 +52,30 @@ namespace Dungeon.Generation
         }
 
         /// <summary>
+        /// Creates a new random seed for the dungeon generation process.
+        /// </summary>
+        [Button("New Random Seed", EButtonEnableMode.Always)]
+        private void NewSeed()
+        {
+            _random = new Random(generationSettings.seed);
+            generationSettings.seed = _random.Next(0, 100000);
+            Reset();
+            CreateOuterBounds();
+            StartCoroutine(AssignmentOrder());
+        }
+
+        /// <summary>
         /// Executes the order of operations for dungeon generation.
         /// </summary>
         /// <returns></returns>
         private IEnumerator AssignmentOrder()
         {
             yield return SplitRooms();
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
             yield return StartCoroutine(CreateGraph());
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
             yield return StartCoroutine(RemoveRooms());
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
             yield return StartCoroutine(CreateDoors());
         }
 

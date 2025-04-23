@@ -461,7 +461,7 @@ MonoBehaviour:
     minRoomSize: {x: 6, y: 10}
     doorSize: 2
     delaySettings:
-      actionDelay: 0.01
+      actionDelay: 2
       <UseDefaultDelayType>k__BackingField: 1
       defaultDelayType: 0
       RoomGeneration: 0

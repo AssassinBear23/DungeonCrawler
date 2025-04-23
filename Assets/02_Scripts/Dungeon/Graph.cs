@@ -4,6 +4,10 @@ using UnityEngine;
 using AYellowpaper.SerializedCollections;
 using System.Linq;
 
+/// <summary>  
+/// Represents a graph data structure that supports generic types.  
+/// </summary>  
+/// <typeparam name="T">The type of elements stored in the graph.</typeparam>
 [Serializable]
 public class Graph<T>
 {

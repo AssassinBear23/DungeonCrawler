@@ -28,6 +28,14 @@ namespace Dungeon.DataStructures
         }
     }
 
+    
+    /// <summary>
+    /// Represents the settings for delays in dungeon generation operations.
+    /// </summary>
+    /// <remarks>
+    /// This class allows customization of delays for various dungeon generation actions.
+    /// Users can specify a default delay type or configure individual delay types for specific actions.
+    /// </remarks>
     [Serializable]
     public class DelaySettings
     {

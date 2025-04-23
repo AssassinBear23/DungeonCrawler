@@ -48,10 +48,14 @@ namespace Dungeon.Generation
             Reset();
             _random = new Random(generationSettings.seed);
             CreateOuterBounds();
-            yield return StartCoroutine(AssignementOrder());
+            yield return StartCoroutine(AssignmentOrder());
         }
 
-        private IEnumerator AssignementOrder()
+        /// <summary>
+        /// Executes the order of operations for dungeon generation.
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator AssignmentOrder()
         {
             yield return SplitRooms();
             yield return new WaitForSeconds(1);
@@ -145,8 +149,9 @@ namespace Dungeon.Generation
         }
 
         /// <summary>
-        /// Visualize the graph of the dungeon.
+        /// Visualizes the graph of rooms and their connections.
         /// </summary>
+        /// <param name="toVisualizeGraph">The graph of rooms to visualize.</param>
         private void VisualizeGraph(Graph<Room> toVisualizeGraph)
         {
             // List to keep track of rooms that have been visualized.
@@ -228,7 +233,8 @@ namespace Dungeon.Generation
 
                 SplitRoom(toSplitRoom.roomDimensions, direction, minSize);
 
-                yield return Delay(generationSettings.delaySettings.RoomGeneration);
+                if (generationSettings.delaySettings.RoomGeneration != DelayType.Instant)
+                    yield return Delay(generationSettings.delaySettings.RoomGeneration);
             }
 
             /// <summary>
@@ -284,7 +290,8 @@ namespace Dungeon.Generation
                 }
                 deletedRooms.Add(roomToRemove);
                 toDrawRooms.Remove(roomToRemove);
-                yield return Delay(generationSettings.delaySettings.RoomRemoval);
+                if (generationSettings.delaySettings.RoomRemoval != DelayType.Instant)
+                    yield return Delay(generationSettings.delaySettings.RoomRemoval);
             }
         }
 
@@ -337,8 +344,8 @@ namespace Dungeon.Generation
                     queue.Enqueue(neighbor);
                     visited.Add(neighbor);
                 }
-
-                yield return Delay(generationSettings.delaySettings.DoorCreation);
+                if (generationSettings.delaySettings.DoorCreation != DelayType.Instant)
+                    yield return Delay(generationSettings.delaySettings.DoorCreation);
             }
 
             mainGraph = graphWithDoors;
@@ -399,8 +406,9 @@ namespace Dungeon.Generation
 
                     connections.AddEdge(toCheck[i], toCheck[j]);
                 }
-                if(drawGraph) VisualizeGraph(connections);
-                yield return Delay(generationSettings.delaySettings.GraphCreation);
+                if (drawGraph) VisualizeGraph(connections);
+                if (generationSettings.delaySettings.GraphCreation != DelayType.Instant)
+                    yield return Delay(generationSettings.delaySettings.GraphCreation);
             }
 
             // If the key doesn't exist, then we add it to the connections graph.

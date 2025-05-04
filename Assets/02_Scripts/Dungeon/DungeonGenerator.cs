@@ -16,7 +16,7 @@ namespace Dungeon.Generation
     public class DungeonGenerator : MonoBehaviour
     {
         [Header("Dungeon Settings")]
-        [SerializeField] private Vector2Int dungeonSize = new(100, 100);
+        [field: SerializeField] public Vector2Int DungeonSize { get; private set; } = new(100, 100);
         [SerializeField] private GenerationSettings generationSettings;
         [Space(10), HorizontalLine(height: 1)]
         [Header("Visualization")]
@@ -29,9 +29,11 @@ namespace Dungeon.Generation
         [Space(10), HorizontalLine(height: 1)]
         [Header("Debugging Lists")]
         [SerializeField] private List<Room> toSplitRooms = new();
+        public List<Room> ToDrawRooms { get => toDrawRooms; }
         [SerializeField] private List<Room> toDrawRooms = new();
         [SerializeField] private List<Room> deletedRooms = new();
         [SerializeField] private List<Room> unreachableRooms = new();
+        public List<RectInt> Doors { get => doors; }
         [SerializeField] private List<RectInt> doors = new();
         [SerializeField] private Graph<Room> mainGraph = new();
         [HorizontalLine(height: 1)]
@@ -107,7 +109,7 @@ namespace Dungeon.Generation
         /// </summary>
         private void CreateOuterBounds()
         {
-            toSplitRooms.Add(new(new(0, 0, dungeonSize.x, dungeonSize.y)));
+            toSplitRooms.Add(new(new(0, 0, DungeonSize.x, DungeonSize.y)));
         }
 
         /// <summary>

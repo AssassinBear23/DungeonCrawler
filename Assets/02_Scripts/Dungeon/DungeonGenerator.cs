@@ -117,27 +117,30 @@ namespace Dungeon.Generation
         {
             foreach (Room room in toSplitRooms)
             {
-                AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.cyan);
+                VisualizeRoom(room, Color.cyan);
             }
             if (drawDungeon)
             {
                 foreach (Room room in toDrawRooms)
                 {
-                    AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.green);
+                    if (drawStarterRoom)
+                        if (room.isStartingRoom) VisualizeRoom(room, Color.magenta);
+                        else
+                            VisualizeRoom(room, Color.green);
                 }
             }
             if (drawDeletedRooms)
             {
                 foreach (Room room in deletedRooms)
                 {
-                    AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.red);
+                    VisualizeRoom(room, Color.red);
                 }
             }
             if (drawUnreachableRooms)
             {
                 foreach (Room room in unreachableRooms)
                 {
-                    AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.yellow);
+                    VisualizeRoom(room, Color.yellow);
                 }
             }
             if (drawDoors && drawDungeon)
@@ -147,17 +150,16 @@ namespace Dungeon.Generation
                     AlgorithmsUtils.DebugRectInt(door, Color.blue);
                 }
             }
-            if (drawStarterRoom)
-            {
-                foreach (Room room in toDrawRooms)
-                {
-                    if (room.isStartingRoom) AlgorithmsUtils.DebugRectInt(room.roomDimensions, Color.magenta);
-                }
-            }
             if (drawGraph)
             {
                 if (mainGraph.GetNodeCount() == 0) return;
                 VisualizeGraph(mainGraph);
+            }
+
+            static void VisualizeRoom(Room room, Color color)
+            {
+                AlgorithmsUtils.DebugRectInt(room.roomDimensions, color);
+                AlgorithmsUtils.DebugRectInt(new RectInt(room.roomDimensions.x + 1, room.roomDimensions.y + 1, room.roomDimensions.width - 2, room.roomDimensions.height - 2), color);
             }
         }
 

@@ -8,6 +8,7 @@ namespace Dungeon.Generation
     using DataStructures;
     using System;
     using System.Linq;
+    using UnityEngine.Events;
 
     /// <summary>
     /// Class thats responsible for generating a dungeon. It makes use of <see cref="Room">Room</see> and <see cref="Graph{T}">Graph</see> classes.
@@ -37,7 +38,8 @@ namespace Dungeon.Generation
         [SerializeField] private List<RectInt> doors = new();
         [SerializeField] private Graph<Room> mainGraph = new();
         [HorizontalLine(height: 1)]
-
+        [Header("Events")]
+        [SerializeField] private UnityEvent onDungeonGenerationStart;
         private Random _random;
 
         /// <summary>
@@ -79,6 +81,8 @@ namespace Dungeon.Generation
             yield return StartCoroutine(RemoveRooms());
             yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
             yield return StartCoroutine(CreateDoors());
+            yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
+            onDungeonGenerationStart?.Invoke();
         }
 
         /// <summary>

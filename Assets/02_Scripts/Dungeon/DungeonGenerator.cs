@@ -427,9 +427,11 @@ namespace Dungeon.Generation
 
                     connections.AddEdge(toCheck[i], toCheck[j]);
                 }
-                if (drawGraph) VisualizeGraph(connections);
                 if (generationSettings.delaySettings.GraphCreation != DelayType.Instant)
+                {
+                    if (drawGraph) VisualizeGraph(connections);
                     yield return Delay(generationSettings.delaySettings.GraphCreation);
+                }
             }
 
             // If the key doesn't exist, then we add it to the connections graph.

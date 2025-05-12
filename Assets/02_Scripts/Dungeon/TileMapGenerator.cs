@@ -4,20 +4,19 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Dungeon.Generation
+namespace Dungeon.Data
 {
     /// <summary>
     /// Generates a tile map based on the dungeon generator's data.
     /// </summary>
-    [RequireComponent(typeof(DungeonGenerator))]
+    [RequireComponent(typeof(DungeonDataGenerator))]
     public class TileMapGenerator : MonoBehaviour
     {
-        [SerializeField]
-        private UnityEvent onGenerateTileMap;
-        [SerializeField]
-        private DungeonGenerator dungeonGenerator;
-        [Space(10)]
-        private int[,] _tileMap;
+        [SerializeField] private DungeonDataGenerator dungeonGenerator;
+        [field: SerializeField] static public int[,] TileMap { get; private set; }
+
+        [field: Header("Events")]
+        [SerializeField] private UnityEvent onTileMapGenerated;
 
         /// <summary>
         /// Generates a tile map based on the dungeon generator's data.
@@ -25,21 +24,21 @@ namespace Dungeon.Generation
         [Button]
         public void GenerateTileMap()
         {
-            int[,] tileMap = new int[dungeonGenerator.DungeonSize.x, dungeonGenerator.DungeonSize.y];
-            int _rows = tileMap.GetLength(0);
-            int _cols = tileMap.GetLength(1);
+            int[,]  _tileMap = new int[dungeonGenerator.DungeonSize.x, dungeonGenerator.DungeonSize.y];
+            int _rows = _tileMap.GetLength(0);
+            int _cols = _tileMap.GetLength(1);
 
-            /*  TODO: generate a tilemap.
-                Method: Get every rooms data, and then fill it into the tilemap. Door data overrides it after filling in doors with a "|" or "-".
+            /*  TODO: generate a tile map.
+                Method: Get every rooms data, and then fill it into the tile map. Door data overrides it after filling in doors with a "|" or "-".
             */
 
-            BlankFill(tileMap, _rows, _cols);
-            GenerateRooms(tileMap);
-            GenerateDoors(tileMap);
+            BlankFill(_tileMap, _rows, _cols);
+            GenerateRooms(_tileMap);
+            GenerateDoors(_tileMap);
 
-            _tileMap = tileMap;
+            TileMap = _tileMap;
 
-            onGenerateTileMap?.Invoke();
+            onTileMapGenerated?.Invoke();
 
             static void BlankFill(int[,] tileMap, int _rows, int _cols)
             {
@@ -96,10 +95,10 @@ namespace Dungeon.Generation
         /// <returns>A string representation of the tile map, where different symbols represent different tile types.</returns>
         public string ToString(bool flipVert = false, bool flipHor = true)
         {
-            if (_tileMap == null) return "Tile map not generated yet.";
+            if (TileMap == null) return "Tile map not generated yet.";
 
-            int rows = _tileMap.GetLength(0);
-            int cols = _tileMap.GetLength(1);
+            int rows = TileMap.GetLength(0);
+            int cols = TileMap.GetLength(1);
 
             var sb = new StringBuilder();
 
@@ -115,7 +114,7 @@ namespace Dungeon.Generation
             {
                 for (int j = startHor; j != endHor; j += stepHor)
                 {
-                    switch (_tileMap[i, j])
+                    switch (TileMap[i, j])
                     {
                         case (0):
                             sb.Append("0");
@@ -138,11 +137,6 @@ namespace Dungeon.Generation
             }
 
             return sb.ToString();
-        }
-
-        public int[,] GetTileMap()
-        {
-            return _tileMap;
         }
 
         [Button]

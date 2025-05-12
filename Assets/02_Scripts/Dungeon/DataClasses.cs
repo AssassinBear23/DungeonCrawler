@@ -73,6 +73,10 @@ namespace Dungeon.DataStructures
         [HorizontalLine]
         public DelaySettings delaySettings;
     }
+
+    /// <summary>
+    /// Represents the type of action for which a delay is applied during dungeon generation.
+    /// </summary>
     public enum DelayAction
     {
         RoomGeneration,
@@ -82,6 +86,9 @@ namespace Dungeon.DataStructures
         DoorCreation
     }
 
+    /// <summary>
+    /// Represents the type of delay to be applied during dungeon generation.
+    /// </summary>
     public enum DelayType
     {
         Instant,

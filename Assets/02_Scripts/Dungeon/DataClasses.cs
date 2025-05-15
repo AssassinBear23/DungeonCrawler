@@ -95,4 +95,14 @@ namespace Dungeon.DataStructures
         Delayed,
         KeyPress
     }
+
+    /// <summary>
+    /// Enum representing the possible directions for room splitting.
+    /// </summary>
+    [Flags]
+    internal enum Direction
+    {
+        Vertical = 1 << 0,
+        Horizontal = 1 << 1
+    }
 }

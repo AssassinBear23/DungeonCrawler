@@ -426,6 +426,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &865651086
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 865651087}
+  m_Layer: 0
+  m_Name: Floor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &865651087
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 865651086}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2044734882}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1564286925
 GameObject:
   m_ObjectHideFlags: 0
@@ -437,6 +468,7 @@ GameObject:
   - component: {fileID: 1564286927}
   - component: {fileID: 1564286926}
   - component: {fileID: 1564286928}
+  - component: {fileID: 1564286929}
   m_Layer: 0
   m_Name: DungeonGenerator
   m_TagString: Untagged
@@ -456,7 +488,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <DungeonSize>k__BackingField: {x: 10, y: 10}
+  <DungeonSize>k__BackingField: {x: 50, y: 50}
   generationSettings:
     seed: 687651687
     minRoomSize: {x: 4, y: 6}
@@ -465,11 +497,11 @@ MonoBehaviour:
       actionDelay: 0.01
       <UseDefaultDelayType>k__BackingField: 1
       defaultDelayType: 0
-      RoomGeneration: 0
-      RoomRemoval: 0
-      GraphCreation: 0
-      GraphFiltering: 0
-      DoorCreation: 2
+      RoomGeneration: 1
+      RoomRemoval: 1
+      GraphCreation: 1
+      GraphFiltering: 1
+      DoorCreation: 1
   drawDungeon: 1
   drawDoors: 1
   drawDeletedRooms: 0
@@ -477,7 +509,7 @@ MonoBehaviour:
   drawStarterRoom: 1
   drawGraph: 1
   toSplitRooms: []
-  toDrawRooms: []
+  <ToDrawRooms>k__BackingField: []
   deletedRooms: []
   unreachableRooms: []
   doors: []
@@ -526,11 +558,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d834b22a4eccbe64db37b237979a1c32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onGenerateTileMap:
+  dungeonGenerator: {fileID: 1564286926}
+  arrayFlippingDirections: 0
+  onTileMapGenerated:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1564286928}
-        m_TargetAssemblyTypeName: Dungeon.Generation.TileMapGenerator, Assembly-CSharp
+        m_TargetAssemblyTypeName: Dungeon.Data.TileMapGenerator, Assembly-CSharp
         m_MethodName: PrintTileMap
         m_Mode: 1
         m_Arguments:
@@ -541,7 +575,67 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  dungeonGenerator: {fileID: 1564286926}
+      - m_Target: {fileID: 1564286929}
+        m_TargetAssemblyTypeName: Dungeon.Generation.DungeonGenerator, Assembly-CSharp
+        m_MethodName: StartGeneration
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1564286929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564286925}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d31bd3c653bbf614086b7239d98ffb79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dungeonDataGenerator: {fileID: 1564286926}
+  tileMapGenerator: {fileID: 1564286928}
+  floorPrefab: {fileID: 2813834988373392366, guid: 5066232015d9c564f8da2aee0c1df781, type: 3}
+  wallPrefabs: []
+  parentWalls: {fileID: 1663865910}
+  parentFloor: {fileID: 865651086}
+--- !u!1 &1663865910
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1663865911}
+  m_Layer: 0
+  m_Name: Walls
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1663865911
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1663865910}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2044734882}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2044734881
 GameObject:
   m_ObjectHideFlags: 0
@@ -570,7 +664,9 @@ Transform:
   m_LocalPosition: {x: 45.31124, y: -0.000005257125, z: 44.10021}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1663865911}
+  - {fileID: 865651087}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807

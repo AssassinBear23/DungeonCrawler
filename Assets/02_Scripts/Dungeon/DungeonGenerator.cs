@@ -6,6 +6,8 @@ namespace Dungeon.Generation
 {
     using Dungeon.Data;
     using Dungeon.DataStructures;
+    using System;
+    using System.Collections;
 
     public class DungeonGenerator : MonoBehaviour
     {
@@ -13,9 +15,9 @@ namespace Dungeon.Generation
         [SerializeField] private DungeonDataGenerator dungeonDataGenerator;
         [SerializeField] private TileMapGenerator tileMapGenerator;
 
-        [field: Header("Prefabs")]
-        [field: SerializeField] public GameObject FloorPrefab { get; private set; }
-        [field: SerializeField] public List<GameObject> WallPrefabs { get; private set; }
+        [Header("Prefabs")]
+        [SerializeField] private GameObject floorPrefab;
+        [SerializeField] private List<GameObject> wallPrefabs;
         [Space(10)]
         [HorizontalLine(1)]
         [Header("Hierarchy")]
@@ -38,9 +40,58 @@ namespace Dungeon.Generation
             int[,] _tileMap = TileMapGenerator.TileMap;
             Room _starterRoom = dungeonDataGenerator.StarterRoom;
 
-            Vector2Int startingPosition = DungeonDataGenerator.CalculateOverlayPosition(_starterRoom).position;
+            Vector2Int startTile = new((int)_starterRoom.roomDimensions.center.x, (int)_starterRoom.roomDimensions.center.x);
+            bool[,] visited = new bool[_tileMap.GetLength(0), _tileMap.GetLength(1)];
+            Queue<Vector2Int> queue = new();
 
+            queue.Enqueue(startTile);
 
+            while (queue.Count > 0)
+            {
+                Vector2Int currentTile = queue.Dequeue();
+
+                // Check direct neighbors
+                CheckNeighbor(_tileMap, new(currentTile.x + 1, currentTile.y), visited, queue);
+                CheckNeighbor(_tileMap, new(currentTile.x - 1, currentTile.y), visited, queue);
+                CheckNeighbor(_tileMap, new(currentTile.x, currentTile.y + 1), visited, queue);
+                CheckNeighbor(_tileMap, new(currentTile.x, currentTile.y - 1), visited, queue);
+
+                if (!visited[currentTile.x, currentTile.y])
+                {
+                    SpawnFloor(currentTile);
+                    visited[currentTile.x, currentTile.y] = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks the neighbors of the current tile and adds them to the queue if they are valid.
+        /// </summary>
+        /// <param name="tileMap">The 2D array representing the dungeon's tile map.</param>
+        /// <param name="toCheckPosition">The position of the neighbor tile to check.</param>
+        /// <param name="visited">A 2D boolean array indicating whether a tile has been visited.</param>
+        /// <param name="queue">The queue used for the flood fill algorithm.</param>
+        private void CheckNeighbor(int[,] tileMap, Vector2Int toCheckPosition, bool[,] visited,  Queue<Vector2Int> queue)
+        {
+            if (toCheckPosition.x < 0
+                || toCheckPosition.x >= tileMap.GetLength(0)
+                || toCheckPosition.y < 0
+                || toCheckPosition.y >= tileMap.GetLength(1)) return;
+
+            if (visited[toCheckPosition.x, toCheckPosition.y] == true) return;
+
+            if (queue.Contains(toCheckPosition)) return;
+
+            if (tileMap[toCheckPosition.x, toCheckPosition.y] != 0 && tileMap[toCheckPosition.x, toCheckPosition.y] != 2) return;
+
+            queue.Enqueue(toCheckPosition);
+        }
+
+        private void SpawnFloor(Vector2Int position)
+        {
+            if (floorPrefab == null) new ArgumentNullException(nameof(floorPrefab), "Floor prefab is not assigned.");
+
+            Instantiate(floorPrefab, new Vector3(position.x + 0.5f, 0, position.y + 0.5f), Quaternion.identity, parentFloor.transform);
         }
 
         /// <summary>
@@ -48,7 +99,7 @@ namespace Dungeon.Generation
         /// </summary>
         private void CreateWalls()
         {
-
+            new NotImplementedException("CreateWalls method is not implemented yet.");
         }
     }
 }

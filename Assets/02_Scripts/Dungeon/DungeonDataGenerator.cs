@@ -6,6 +6,7 @@ using UnityEngine;
 namespace Dungeon.Data
 {
     using DataStructures;
+    using Dungeon.HelperMethods;
     using System;
     using System.Linq;
     using UnityEngine.Events;
@@ -132,7 +133,7 @@ namespace Dungeon.Data
             foreach (Room room in rooms)
             {
                 // Visualize the room with a white rectangle.
-                AlgorithmsUtils.DebugRectInt(CalculateOverlayPosition(room), Color.white);
+                AlgorithmsUtils.DebugRectInt(AlgorithmsUtils.CalculateOverlayPosition(room), Color.white);
 
                 // Add the room to the list of visualized rooms.
                 visualizedRoomPairs.Add(room, new());
@@ -147,31 +148,16 @@ namespace Dungeon.Data
                     if (visualizedRoomPairs.ContainsKey(neighbor)) continue;
 
                     // Visualize the neighbor with a black rectangle.
-                    AlgorithmsUtils.DebugRectInt(CalculateOverlayPosition(neighbor), Color.white);
+                    AlgorithmsUtils.DebugRectInt(AlgorithmsUtils.CalculateOverlayPosition(neighbor), Color.white);
 
-                    Vector2 roomCenter = CalculateOverlayPosition(room).center;
-                    Vector2 neighborCenter = CalculateOverlayPosition(neighbor).center;
+                    Vector2 roomCenter = AlgorithmsUtils.CalculateOverlayPosition(room).center;
+                    Vector2 neighborCenter = AlgorithmsUtils.CalculateOverlayPosition(neighbor).center;
                     Debug.DrawLine(new(roomCenter.x, 0, roomCenter.y), new(neighborCenter.x, 0, neighborCenter.y), Color.white);
 
                     // Add the neighbor to the list of visualized rooms.
                     visualizedRoomPairs[room].Add(neighbor);
                 }
             }
-        }
-
-        /// <summary>
-        /// Calculates the overlay position of a given room.
-        /// </summary>
-        /// <param name="room">The room for which to calculate the overlay position.</param>
-        /// <returns>A RectInt representing the overlay position of the room.</returns>
-        static public RectInt CalculateOverlayPosition(Room room)
-        {
-            RectInt position = room.roomDimensions;
-            position.x += position.width / 2;
-            position.y += position.height / 2;
-            position.width = 1;
-            position.height = 1;
-            return position;
         }
 
         /// <summary>
@@ -479,14 +465,5 @@ namespace Dungeon.Data
             }
         }
         #endregion Methods
-    }
-
-    /// <summary>
-    /// Enum representing the possible directions for room splitting.
-    /// </summary>
-    internal enum Direction
-    {
-        Vertical,
-        Horizontal
     }
 }

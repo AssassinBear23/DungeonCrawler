@@ -11,7 +11,7 @@ namespace Dungeon.Data
     using UnityEngine.Events;
 
     /// <summary>
-    /// Class thats responsible for generating a dungeon. It makes use of <see cref="Room">Room</see> and <see cref="Graph{T}">Graph</see> classes.
+    /// Class that's responsible for generating a dungeon. It makes use of <see cref="Room">Room</see> and <see cref="Graph{T}">Graph</see> classes.
     /// <para> Settings set in <see cref="GenerationSettings"> Generation Settings</see></para>
     /// </summary>
     public class DungeonDataGenerator : MonoBehaviour
@@ -108,63 +108,11 @@ namespace Dungeon.Data
         #region Methods
 
         /// <summary>
-        /// Sets the outer bounds of the dungeon. Dictated by <see cref="dungeonSize">dungeonSize</see> variable.
+        /// Sets the outer bounds of the dungeon. Dictated by <see cref="DungeonSize">dungeonSize</see> variable.
         /// </summary>
         private void CreateOuterBounds()
         {
             toSplitRooms.Add(new(new(0, 0, DungeonSize.x, DungeonSize.y)));
-        }
-
-        /// <summary>
-        /// Visualizes the rooms in the dungeon.
-        /// </summary>
-        private void Visualization()
-        {
-            foreach (Room room in toSplitRooms)
-            {
-                VisualizeRoom(room, Color.cyan);
-            }
-            if (drawDungeon)                // Draw the dungeon
-            {
-                foreach (Room room in ToDrawRooms)
-                {
-                    VisualizeRoom(room, Color.green);
-                }
-            }
-            if (drawDeletedRooms)           // Draw deleted rooms
-            {
-                foreach (Room room in deletedRooms)
-                {
-                    VisualizeRoom(room, Color.red);
-                }
-            }
-            if (drawUnreachableRooms)       // Draw unreachable rooms (obsolete)
-            {
-                foreach (Room room in unreachableRooms)
-                {
-                    VisualizeRoom(room, Color.yellow);
-                }
-            }
-            if (drawDoors && drawDungeon)   // Draw Doors
-            {
-                foreach (var door in doors)
-                {
-                    AlgorithmsUtils.DebugRectInt(door, Color.blue);
-                }
-            }
-            if (drawGraph)                  // Draw the graph
-            {
-                if (mainGraph.GetNodeCount() == 0) return;
-                VisualizeGraph(mainGraph);
-            }
-            if (drawStarterRoom && StarterRoom != null)            // Draw starter room separately
-                VisualizeRoom(StarterRoom, Color.magenta);
-
-            static void VisualizeRoom(Room room, Color color)
-            {
-                AlgorithmsUtils.DebugRectInt(room.roomDimensions, color);
-                AlgorithmsUtils.DebugRectInt(new RectInt(room.roomDimensions.x + 1, room.roomDimensions.y + 1, room.roomDimensions.width - 2, room.roomDimensions.height - 2), color);
-            }
         }
 
         /// <summary>
@@ -202,8 +150,8 @@ namespace Dungeon.Data
                     AlgorithmsUtils.DebugRectInt(CalculateOverlayPosition(neighbor), Color.white);
 
                     Vector2 roomCenter = CalculateOverlayPosition(room).center;
-                    Vector2 neighbourCenter = CalculateOverlayPosition(neighbor).center;
-                    Debug.DrawLine(new(roomCenter.x, 0, roomCenter.y), new(neighbourCenter.x, 0, neighbourCenter.y), Color.white);
+                    Vector2 neighborCenter = CalculateOverlayPosition(neighbor).center;
+                    Debug.DrawLine(new(roomCenter.x, 0, roomCenter.y), new(neighborCenter.x, 0, neighborCenter.y), Color.white);
 
                     // Add the neighbor to the list of visualized rooms.
                     visualizedRoomPairs[room].Add(neighbor);
@@ -216,7 +164,7 @@ namespace Dungeon.Data
         /// </summary>
         /// <param name="room">The room for which to calculate the overlay position.</param>
         /// <returns>A RectInt representing the overlay position of the room.</returns>
-        private RectInt CalculateOverlayPosition(Room room)
+        static public RectInt CalculateOverlayPosition(Room room)
         {
             RectInt position = room.roomDimensions;
             position.x += position.width / 2;
@@ -267,7 +215,6 @@ namespace Dungeon.Data
                 Room splitRoomA = new(RectInt.zero);
                 Room splitRoomB = new(RectInt.zero);
 
-                // If the direction decided was vertical, then cut the room vertically
                 if (direction == Direction.Vertical)
                 {
                     int width = _random.Next(minSize, toSplit.width - minSize);
@@ -277,7 +224,6 @@ namespace Dungeon.Data
                     toSplitRooms.Add(splitRoomA);
                     toSplitRooms.Add(splitRoomB);
                 }
-                // if not vertical, then cut the room horizontally
                 else
                 {
                     int height = _random.Next(minSize, toSplit.height - minSize);
@@ -296,7 +242,6 @@ namespace Dungeon.Data
         /// <returns>IEnumerator for coroutine.</returns>
         private IEnumerator RemoveRooms()
         {
-            // Sorting the list using LINQ, in order of size, smallest to largest.
             List<Room> orderedRooms = ToDrawRooms.OrderBy(x => x.roomDimensions.width * x.roomDimensions.height).ToList();
             int amountOfRoomsToRemove = Mathf.CeilToInt(orderedRooms.Count * 0.1f);
 
@@ -317,7 +262,7 @@ namespace Dungeon.Data
         [HideInInspector] public Room StarterRoom { get; private set; }
 
         /// <summary>
-        /// Builds the doors between rooms using spanning-tree algorithm to ensure each door is created only once.
+        /// Builds the doors between rooms using <see href="https://en.wikipedia.org/wiki/Breadth-first_search">BFS</see> to ensure each door is created only once.
         /// </summary>
         private IEnumerator CreateDoors()
         {
@@ -480,6 +425,58 @@ namespace Dungeon.Data
         {
             //Debug.Log("Doing instant pass");
             return generationSettings.delaySettings.UseDefaultDelayType && generationSettings.delaySettings.defaultDelayType == DelayType.Instant;
+        }
+
+        /// <summary>
+        /// Visualizes the rooms in the dungeon.
+        /// </summary>
+        private void Visualization()
+        {
+            foreach (Room room in toSplitRooms)
+            {
+                VisualizeRoom(room, Color.cyan);
+            }
+            if (drawDungeon)
+            {
+                foreach (Room room in ToDrawRooms)
+                {
+                    VisualizeRoom(room, Color.green);
+                }
+            }
+            if (drawDeletedRooms)
+            {
+                foreach (Room room in deletedRooms)
+                {
+                    VisualizeRoom(room, Color.red);
+                }
+            }
+            if (drawUnreachableRooms)
+            {
+                foreach (Room room in unreachableRooms)
+                {
+                    VisualizeRoom(room, Color.yellow);
+                }
+            }
+            if (drawDoors && drawDungeon)
+            {
+                foreach (var door in doors)
+                {
+                    AlgorithmsUtils.DebugRectInt(door, Color.blue);
+                }
+            }
+            if (drawGraph)
+            {
+                if (mainGraph.GetNodeCount() == 0) return;
+                VisualizeGraph(mainGraph);
+            }
+            if (drawStarterRoom && StarterRoom != null)
+                VisualizeRoom(StarterRoom, Color.magenta);
+
+            static void VisualizeRoom(Room room, Color color)
+            {
+                AlgorithmsUtils.DebugRectInt(room.roomDimensions, color);
+                AlgorithmsUtils.DebugRectInt(new RectInt(room.roomDimensions.x + 1, room.roomDimensions.y + 1, room.roomDimensions.width - 2, room.roomDimensions.height - 2), color);
+            }
         }
         #endregion Methods
     }

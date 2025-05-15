@@ -24,68 +24,81 @@ namespace Dungeon.Data
         [Button]
         public void GenerateTileMap()
         {
-            int[,]  _tileMap = new int[dungeonGenerator.DungeonSize.x, dungeonGenerator.DungeonSize.y];
-            int _rows = _tileMap.GetLength(0);
-            int _cols = _tileMap.GetLength(1);
+            int[,] _tileMap = new int[dungeonGenerator.DungeonSize.x, dungeonGenerator.DungeonSize.y];
 
             /*  TODO: generate a tile map.
                 Method: Get every rooms data, and then fill it into the tile map. Door data overrides it after filling in doors with a "|" or "-".
             */
 
-            BlankFill(_tileMap, _rows, _cols);
+            BlankFill(_tileMap);
             GenerateRooms(_tileMap);
             GenerateDoors(_tileMap);
 
             TileMap = _tileMap;
 
             onTileMapGenerated?.Invoke();
+        }
 
-            static void BlankFill(int[,] tileMap, int _rows, int _cols)
+        /// <summary>  
+        /// Fills the tile map with empty spaces.  
+        /// </summary>  
+        /// <param name="_tileMap">The 2D array representing the tile map to be filled with empty spaces.</param>  
+        void BlankFill(int[,] _tileMap)
+        {
+            int _rows = _tileMap.GetLength(0);
+            int _cols = _tileMap.GetLength(1);
+
+            for (int i = 0; i < _rows; i++)
             {
-                for (int i = 0; i < _rows; i++)
+                for (int j = 0; j < _cols; j++)
                 {
-                    for (int j = 0; j < _cols; j++)
-                    {
-                        tileMap[i, j] = -1; // Empty space
-                    }
+                    _tileMap[i, j] = -1; // Empty space  
                 }
             }
+        }
 
-            void GenerateRooms(int[,] tileMap)
+        /// <summary>  
+        /// Populates the tile map with rooms based on the dungeon generator's room data.  
+        /// </summary>  
+        /// <param name="tileMap">The 2D array representing the tile map to be populated with rooms.</param>  
+        void GenerateRooms(int[,] tileMap)
+        {
+            foreach (Room room in dungeonGenerator.ToDrawRooms)
             {
-                foreach (Room room in dungeonGenerator.ToDrawRooms)
+                RectInt roomSize = room.roomDimensions;
+                for (int i = roomSize.x; i < roomSize.x + roomSize.width; i++)
                 {
-                    RectInt roomSize = room.roomDimensions;
-                    for (int i = roomSize.x; i < roomSize.x + roomSize.width; i++)
+                    for (int j = roomSize.y; j < roomSize.y + roomSize.height; j++)
                     {
-                        for (int j = roomSize.y; j < roomSize.y + roomSize.height; j++)
-                        {
-                            if (i == roomSize.xMin || i == roomSize.xMax - 1 || j == roomSize.yMin || j == roomSize.yMax - 1)
-                                tileMap[i, j] = 1; // Wall
-                            else
-                                tileMap[i, j] = 0; // Floor
-                        }
-                    }
-                }
-            }
-
-            void GenerateDoors(int[,] tileMap)
-            {
-                foreach (RectInt door in dungeonGenerator.Doors)
-                {
-
-                    for (int i = door.x; i < door.x + door.width; i++)
-                    {
-                        for (int j = door.y; j < door.y + door.height; j++)
-                        {
-                            tileMap[i, j] = door.height > door.width
-                                ? 2  // Horizontal door
-                                : 3; // Vertical door
-                        }
+                        if (i == roomSize.xMin || i == roomSize.xMax - 1 || j == roomSize.yMin || j == roomSize.yMax - 1)
+                            tileMap[i, j] = 1; // Wall  
+                        else
+                            tileMap[i, j] = 0; // Floor  
                     }
                 }
             }
         }
+
+        /// <summary>  
+        /// Adds doors to the tile map based on the dungeon generator's door data.  
+        /// </summary>  
+        /// <param name="tileMap">The 2D array representing the tile map to be updated with door data.</param>  
+        void GenerateDoors(int[,] tileMap)
+        {
+            foreach (RectInt door in dungeonGenerator.Doors)
+            {
+                for (int i = door.x; i < door.x + door.width; i++)
+                {
+                    for (int j = door.y; j < door.y + door.height; j++)
+                    {
+                        tileMap[i, j] = door.height > door.width
+                            ? 2  // Horizontal door  
+                            : 3; // Vertical door  
+                    }
+                }
+            }
+        }
+
 
         /// <summary>
         /// Converts the generated tile map into a string representation.
@@ -110,9 +123,9 @@ namespace Dungeon.Data
             int endHor = flipHor ? -1 : cols;
             int stepHor = flipHor ? -1 : 1;
 
-            for (int i = startVert; i != endVert; i += stepVert)
+            for (int j = startHor; j != endHor; j += stepHor)
             {
-                for (int j = startHor; j != endHor; j += stepHor)
+                for (int i = startVert; i != endVert; i += stepVert)
                 {
                     switch (TileMap[i, j])
                     {

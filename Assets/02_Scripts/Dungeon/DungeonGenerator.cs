@@ -38,6 +38,8 @@ namespace Dungeon.Generation
             int[,] _tileMap = TileMapGenerator.TileMap;
             Room _starterRoom = dungeonDataGenerator.StarterRoom;
 
+            Vector2Int startingPosition = DungeonDataGenerator.CalculateOverlayPosition(_starterRoom).position;
+
 
         }
 

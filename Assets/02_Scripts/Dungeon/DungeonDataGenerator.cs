@@ -17,9 +17,10 @@ namespace Dungeon.Data
     /// </summary>
     public class DungeonDataGenerator : MonoBehaviour
     {
+        [HideInInspector] public static DungeonDataGenerator Instance { get; private set; }
         [field: Header("Dungeon Settings")]
         [field: SerializeField] public Vector2Int DungeonSize { get; private set; } = new(100, 100);
-        [SerializeField] private GenerationSettings generationSettings;
+        [field: SerializeField] public GenerationSettings GenerationSettings { get; private set; } 
         [Space(10), HorizontalLine(height: 1)]
         [Header("Visualization")]
         [SerializeField] private bool drawDungeon;
@@ -49,10 +50,24 @@ namespace Dungeon.Data
         [Button("Start Dungeon Generation", EButtonEnableMode.Playmode)]
         private IEnumerator Start()
         {
+            SetupSingleton();
+
             Reset();
-            _random = new Random(generationSettings.seed);
+            _random = new Random(GenerationSettings.seed);
             CreateOuterBounds();
             yield return StartCoroutine(AssignmentOrder());
+        }
+
+        private void SetupSingleton()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
 
         /// <summary>
@@ -61,8 +76,8 @@ namespace Dungeon.Data
         [Button("New Random Seed", EButtonEnableMode.Always)]
         private void NewSeed()
         {
-            _random = new Random(generationSettings.seed);
-            generationSettings.seed = _random.Next(0, 100000);
+            _random = new Random(GenerationSettings.seed);
+            GenerationSettings.seed = _random.Next(0, 100000);
             Reset();
             CreateOuterBounds();
             StartCoroutine(AssignmentOrder());
@@ -75,13 +90,13 @@ namespace Dungeon.Data
         private IEnumerator AssignmentOrder()
         {
             yield return SplitRooms();
-            yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
+            yield return new WaitForSeconds(GenerationSettings.delaySettings.actionDelay);
             yield return StartCoroutine(CreateGraph());
-            yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
+            yield return new WaitForSeconds(GenerationSettings.delaySettings.actionDelay);
             yield return StartCoroutine(RemoveRooms());
-            yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
+            yield return new WaitForSeconds(GenerationSettings.delaySettings.actionDelay);
             yield return StartCoroutine(CreateDoors());
-            yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
+            yield return new WaitForSeconds(GenerationSettings.delaySettings.actionDelay);
             onDungeonGenerationStart?.Invoke();
         }
 
@@ -116,49 +131,7 @@ namespace Dungeon.Data
             toSplitRooms.Add(new(new(0, 0, DungeonSize.x, DungeonSize.y)));
         }
 
-        /// <summary>
-        /// Visualizes the graph of rooms and their connections.
-        /// </summary>
-        /// <param name="toVisualizeGraph">The graph of rooms to visualize.</param>
-        private void VisualizeGraph(Graph<Room> toVisualizeGraph)
-        {
-            // List to keep track of rooms that have been visualized.
-            Dictionary<Room, List<Room>> visualizedRoomPairs = new();
-
-            Graph<Room> graph = toVisualizeGraph;
-
-            List<Room> rooms = graph.GetNodes();
-
-            // Iterate through each room in the graph.
-            foreach (Room room in rooms)
-            {
-                // Visualize the room with a white rectangle.
-                AlgorithmsUtils.DebugRectInt(AlgorithmsUtils.CalculateOverlayPosition(room), Color.white);
-
-                // Add the room to the list of visualized rooms.
-                visualizedRoomPairs.Add(room, new());
-
-                // Get the neighbors of the current room.
-                List<Room> neighbors = graph.GetNeighbours(room);
-
-                // Iterate through each neighbor of the current room.
-                foreach (Room neighbor in neighbors)
-                {
-                    // If the neighbor has already been visualized, skip it.
-                    if (visualizedRoomPairs.ContainsKey(neighbor)) continue;
-
-                    // Visualize the neighbor with a black rectangle.
-                    AlgorithmsUtils.DebugRectInt(AlgorithmsUtils.CalculateOverlayPosition(neighbor), Color.white);
-
-                    Vector2 roomCenter = AlgorithmsUtils.CalculateOverlayPosition(room).center;
-                    Vector2 neighborCenter = AlgorithmsUtils.CalculateOverlayPosition(neighbor).center;
-                    Debug.DrawLine(new(roomCenter.x, 0, roomCenter.y), new(neighborCenter.x, 0, neighborCenter.y), Color.white);
-
-                    // Add the neighbor to the list of visualized rooms.
-                    visualizedRoomPairs[room].Add(neighbor);
-                }
-            }
-        }
+        
 
         /// <summary>
         /// Coroutine that splits the rooms in the dungeon.
@@ -170,13 +143,13 @@ namespace Dungeon.Data
             {
                 Room toSplitRoom = toSplitRooms.Pop(0);
 
-                int minSize = _random.Next(generationSettings.minRoomSize.x, generationSettings.minRoomSize.y);
+                int minSize = _random.Next(GenerationSettings.minRoomSize.x, GenerationSettings.minRoomSize.y);
 
-                Debug.Log("Currently want to split " + toSplitRoom);
+                //Debug.Log("Currently want to split " + toSplitRoom);
 
                 if (toSplitRoom.roomDimensions.width / 2 < minSize && toSplitRoom.roomDimensions.height / 2 < minSize)
                 {
-                    Debug.Log("Current room to split is too small to split further. Current size is " + toSplitRoom);
+                    //Debug.Log("Current room to split is too small to split further. Current size is " + toSplitRoom);
                     ToDrawRooms.Add(toSplitRoom);
                     continue;
                 }
@@ -186,8 +159,8 @@ namespace Dungeon.Data
 
                 SplitRoom(toSplitRoom.roomDimensions, direction, minSize);
 
-                if (!DoInstantPass() && generationSettings.delaySettings.RoomGeneration != DelayType.Instant)
-                    yield return Delay(generationSettings.delaySettings.RoomGeneration);
+                if (!AlgorithmsUtils.DoInstantPass() && GenerationSettings.delaySettings.RoomGeneration != DelayType.Instant)
+                    yield return StartCoroutine(AlgorithmsUtils.Delay(GenerationSettings.delaySettings.RoomGeneration));
             }
 
             /// <summary>
@@ -240,8 +213,8 @@ namespace Dungeon.Data
                 }
                 deletedRooms.Add(roomToRemove);
                 ToDrawRooms.Remove(roomToRemove);
-                if (!DoInstantPass() && generationSettings.delaySettings.RoomRemoval != DelayType.Instant)
-                    yield return Delay(generationSettings.delaySettings.RoomRemoval);
+                if (!AlgorithmsUtils.DoInstantPass() && GenerationSettings.delaySettings.RoomRemoval != DelayType.Instant)
+                    yield return StartCoroutine(AlgorithmsUtils.Delay(GenerationSettings.delaySettings.RoomRemoval));
             }
         }
 
@@ -257,7 +230,7 @@ namespace Dungeon.Data
             List<Room> rooms = startGraph.GetNodes();       // The rooms in the graph
             HashSet<Room> visited = new();
             Queue<Room> queue = new();
-            int doorSize = generationSettings.doorSize;     // The door size to use
+            int doorSize = GenerationSettings.doorSize;     // The door size to use
 
             if (rooms.Count == 0) yield break;              // If there are no rooms then stop
 
@@ -293,8 +266,8 @@ namespace Dungeon.Data
                     queue.Enqueue(neighbor);
                     visited.Add(neighbor);
                 }
-                if (!DoInstantPass() && generationSettings.delaySettings.DoorCreation != DelayType.Instant)
-                    yield return Delay(generationSettings.delaySettings.DoorCreation);
+                if (!AlgorithmsUtils.DoInstantPass() && GenerationSettings.delaySettings.DoorCreation != DelayType.Instant)
+                    yield return StartCoroutine(AlgorithmsUtils.Delay(GenerationSettings.delaySettings.DoorCreation));
             }
 
             mainGraph = graphWithDoors;
@@ -332,7 +305,7 @@ namespace Dungeon.Data
             List<Room> toCheck = new(ToDrawRooms);
             Graph<Room> connections = new();        // Graph to store the connections in
 
-            int doorSize = generationSettings.doorSize;
+            int doorSize = GenerationSettings.doorSize;
 
             for (int i = 0; i < toCheck.Count; i++)
             {
@@ -354,10 +327,10 @@ namespace Dungeon.Data
 
                     connections.AddEdge(toCheck[i], toCheck[j]);
                 }
-                if (!DoInstantPass() && generationSettings.delaySettings.GraphCreation != DelayType.Instant)
+                if (!AlgorithmsUtils.DoInstantPass() && GenerationSettings.delaySettings.GraphCreation != DelayType.Instant)
                 {
                     if (drawGraph) VisualizeGraph(connections);
-                    yield return Delay(generationSettings.delaySettings.GraphCreation);
+                    yield return StartCoroutine(AlgorithmsUtils.Delay(GenerationSettings.delaySettings.GraphCreation));
                 }
             }
 
@@ -369,50 +342,9 @@ namespace Dungeon.Data
 
             mainGraph = connections;
         }
+        #endregion Methods
 
-        /// <summary>
-        /// Delays the execution based on the specified delay type.
-        /// </summary>
-        /// <param name="delayType">The type of delay to apply (Instant, Delayed, KeyPress).</param>
-        /// <returns>An IEnumerator for the coroutine.</returns>
-        private IEnumerator Delay(DelayType delayType)
-        {
-            if (!generationSettings.delaySettings.UseDefaultDelayType)
-            {
-                switch (delayType)
-                {
-                    case DelayType.Instant:
-                        break;
-                    case DelayType.Delayed:
-                        yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
-                        break;
-                    case DelayType.KeyPress:
-                        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
-                        break;
-                }
-            }
-            else
-            {
-                switch (generationSettings.delaySettings.defaultDelayType)
-                {
-                    case DelayType.Instant:
-                        break;
-                    case DelayType.Delayed:
-                        yield return new WaitForSeconds(generationSettings.delaySettings.actionDelay);
-                        break;
-                    case DelayType.KeyPress:
-                        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
-                        break;
-                }
-            }
-        }
-
-        private bool DoInstantPass()
-        {
-            //Debug.Log("Doing instant pass");
-            return generationSettings.delaySettings.UseDefaultDelayType && generationSettings.delaySettings.defaultDelayType == DelayType.Instant;
-        }
-
+        #region Visualization
         /// <summary>
         /// Visualizes the rooms in the dungeon.
         /// </summary>
@@ -464,6 +396,50 @@ namespace Dungeon.Data
                 AlgorithmsUtils.DebugRectInt(new RectInt(room.roomDimensions.x + 1, room.roomDimensions.y + 1, room.roomDimensions.width - 2, room.roomDimensions.height - 2), color);
             }
         }
-        #endregion Methods
+
+        /// <summary>
+        /// Visualizes the graph of rooms and their connections.
+        /// </summary>
+        /// <param name="toVisualizeGraph">The graph of rooms to visualize.</param>
+        private void VisualizeGraph(Graph<Room> toVisualizeGraph)
+        {
+            // List to keep track of rooms that have been visualized.
+            Dictionary<Room, List<Room>> visualizedRoomPairs = new();
+
+            Graph<Room> graph = toVisualizeGraph;
+
+            List<Room> rooms = graph.GetNodes();
+
+            // Iterate through each room in the graph.
+            foreach (Room room in rooms)
+            {
+                // Visualize the room with a white rectangle.
+                AlgorithmsUtils.DebugRectInt(AlgorithmsUtils.CalculateOverlayPosition(room), Color.white);
+
+                // Add the room to the list of visualized rooms.
+                visualizedRoomPairs.Add(room, new());
+
+                // Get the neighbors of the current room.
+                List<Room> neighbors = graph.GetNeighbours(room);
+
+                // Iterate through each neighbor of the current room.
+                foreach (Room neighbor in neighbors)
+                {
+                    // If the neighbor has already been visualized, skip it.
+                    if (visualizedRoomPairs.ContainsKey(neighbor)) continue;
+
+                    // Visualize the neighbor with a black rectangle.
+                    AlgorithmsUtils.DebugRectInt(AlgorithmsUtils.CalculateOverlayPosition(neighbor), Color.white);
+
+                    Vector2 roomCenter = AlgorithmsUtils.CalculateOverlayPosition(room).center;
+                    Vector2 neighborCenter = AlgorithmsUtils.CalculateOverlayPosition(neighbor).center;
+                    Debug.DrawLine(new(roomCenter.x, 0, roomCenter.y), new(neighborCenter.x, 0, neighborCenter.y), Color.white);
+
+                    // Add the neighbor to the list of visualized rooms.
+                    visualizedRoomPairs[room].Add(neighbor);
+                }
+            }
+        }
+        #endregion Visualization
     }
 }

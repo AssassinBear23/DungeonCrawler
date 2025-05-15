@@ -6,7 +6,9 @@ namespace Dungeon.Generation
 {
     using Dungeon.Data;
     using Dungeon.DataStructures;
+    using Dungeon.HelperMethods;
     using System;
+    using System.Collections;
 
     public class DungeonGenerator : MonoBehaviour
     {
@@ -34,7 +36,7 @@ namespace Dungeon.Generation
         /// <summary>
         /// Create the floor of the dungeon using the flood fill algorithm.
         /// </summary>
-        private void CreateFloor()
+        private IEnumerator CreateFloor()
         {
             int[,] _tileMap = TileMapGenerator.TileMap;
             Room _starterRoom = dungeonDataGenerator.StarterRoom;
@@ -60,6 +62,8 @@ namespace Dungeon.Generation
                     SpawnFloor(currentTile);
                     visited[currentTile.x, currentTile.y] = true;
                 }
+                if (!AlgorithmsUtils.DoInstantPass() && DungeonDataGenerator.Instance.GenerationSettings.delaySettings.FloorPlacement != DelayType.Instant)
+                    yield return StartCoroutine(AlgorithmsUtils.Delay(DungeonDataGenerator.Instance.GenerationSettings.delaySettings.FloorPlacement));
             }
         }
 
@@ -97,22 +101,22 @@ namespace Dungeon.Generation
             Instantiate(floorPrefab, new Vector3(position.x + 0.5f, 0, position.y + 0.5f), Quaternion.identity, parentFloor.transform);
         }
 
+
         /// <summary>
         /// Create the walls of the dungeon using binary operations to check which wall needs to go on the tile.
         /// </summary>
-        private void CreateWalls()
+        private IEnumerator CreateWalls()
         {
-            //new NotImplementedException("CreateWalls method is not implemented yet.");
-
             int[,] _tileMap = TileMapGenerator.TileMap;
-
-
 
             for (int i = 0; i < _tileMap.GetLength(0) - 1; i++)
             {
                 for (int j = 0; j < _tileMap.GetLength(1) - 1; j++)
                 {
+                    if (!AlgorithmsUtils.DoInstantPass() && DungeonDataGenerator.Instance.GenerationSettings.delaySettings.WallPlacement != DelayType.Instant)
+                        yield return StartCoroutine(AlgorithmsUtils.Delay(DungeonDataGenerator.Instance.GenerationSettings.delaySettings.WallPlacement));
                     int bitSum = CalculateBitSum(_tileMap, i, j);
+
                     InstantiateWall(new Vector2(i, j), bitSum);
                 }
             }

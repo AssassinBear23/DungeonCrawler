@@ -4,7 +4,9 @@ using UnityEngine;
 
 namespace Dungeon.HelperMethods
 {
+    using Dungeon.Data;
     using Dungeon.DataStructures;
+    using System.Collections;
 
     public class AlgorithmsUtils
     {
@@ -113,6 +115,51 @@ namespace Dungeon.HelperMethods
             position.width = 1;
             position.height = 1;
             return position;
+        }
+
+        /// <summary>
+        /// Delays the execution based on the specified delay type.
+        /// </summary>
+        /// <param name="delayType">The type of delay to apply (Instant, Delayed, KeyPress).</param>
+        /// <returns>An IEnumerator for the coroutine.</returns>
+        public static IEnumerator Delay(DelayType delayType)
+        {
+            DelaySettings delaySettings = DungeonDataGenerator.Instance.GenerationSettings.delaySettings;
+
+            if (!delaySettings.UseDefaultDelayType)
+            {
+                switch (delayType)
+                {
+                    case DelayType.Instant:
+                        break;
+                    case DelayType.Delayed:
+                        yield return new WaitForSeconds(delaySettings.actionDelay);
+                        break;
+                    case DelayType.KeyPress:
+                        yield return new WaitUntil(() => Input.GetKeyUp(KeyCode.Space));
+                        break;
+                }
+            }
+            else
+            {
+                switch (delaySettings.defaultDelayType)
+                {
+                    case DelayType.Instant:
+                        break;
+                    case DelayType.Delayed:
+                        yield return new WaitForSeconds(delaySettings.actionDelay);
+                        break;
+                    case DelayType.KeyPress:
+                        yield return new WaitUntil(() => Input.GetKeyUp(KeyCode.Space));
+                        break;
+                }
+            }
+        }
+
+        public static bool DoInstantPass()
+        {
+            //Debug.Log("Doing instant pass");
+            return DungeonDataGenerator.Instance.GenerationSettings.delaySettings.UseDefaultDelayType && DungeonDataGenerator.Instance.GenerationSettings.delaySettings.defaultDelayType == DelayType.Instant;
         }
     }
 

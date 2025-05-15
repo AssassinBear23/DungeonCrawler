@@ -7,7 +7,6 @@ namespace Dungeon.Generation
     using Dungeon.Data;
     using Dungeon.DataStructures;
     using System;
-    using System.Collections;
 
     public class DungeonGenerator : MonoBehaviour
     {
@@ -29,7 +28,7 @@ namespace Dungeon.Generation
         public void StartGeneration()
         {
             CreateFloor();
-            CreateWalls();
+            //CreateWalls();
         }
 
         /// <summary>
@@ -71,7 +70,7 @@ namespace Dungeon.Generation
         /// <param name="toCheckPosition">The position of the neighbor tile to check.</param>
         /// <param name="visited">A 2D boolean array indicating whether a tile has been visited.</param>
         /// <param name="queue">The queue used for the flood fill algorithm.</param>
-        private void CheckNeighbor(int[,] tileMap, Vector2Int toCheckPosition, bool[,] visited,  Queue<Vector2Int> queue)
+        private void CheckNeighbor(int[,] tileMap, Vector2Int toCheckPosition, bool[,] visited, Queue<Vector2Int> queue)
         {
             if (toCheckPosition.x < 0
                 || toCheckPosition.x >= tileMap.GetLength(0)
@@ -87,6 +86,10 @@ namespace Dungeon.Generation
             queue.Enqueue(toCheckPosition);
         }
 
+        /// <summary>
+        /// Spawns the floor prefab at the specified position.
+        /// </summary>
+        /// <param name="position">The position to spawn the floor prefab at</param>
         private void SpawnFloor(Vector2Int position)
         {
             if (floorPrefab == null) new ArgumentNullException(nameof(floorPrefab), "Floor prefab is not assigned.");
@@ -99,7 +102,32 @@ namespace Dungeon.Generation
         /// </summary>
         private void CreateWalls()
         {
-            new NotImplementedException("CreateWalls method is not implemented yet.");
+            //new NotImplementedException("CreateWalls method is not implemented yet.");
+
+            int[,] _tileMap = TileMapGenerator.TileMap;
+
+
+
+            for (int i = 0; i < _tileMap.GetLength(0) - 1; i++)
+            {
+                for (int j = 0; j < _tileMap.GetLength(1) - 1; j++)
+                {
+                    int bitSum = CalculateBitSum(_tileMap, i, j);
+                    InstantiateWall(new Vector2(i, j), bitSum);
+                }
+            }
+        }
+
+        private static int CalculateBitSum(int[,] _tileMap, int i, int j)
+        {
+            return 1 * _tileMap[i, j] + 2 * _tileMap[i + 1, j] + 4 * _tileMap[i, j + 1] + 8 * _tileMap[i + 1, j + 1];
+        }
+
+        private void InstantiateWall(Vector2 position, int wallIndex)
+        {
+            if (wallPrefabs[wallIndex] == null) return;
+
+
         }
     }
 }

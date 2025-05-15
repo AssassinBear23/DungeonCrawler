@@ -97,7 +97,7 @@ namespace Dungeon.Data
                         //tileMap[i, j] = door.height < door.width
                         //    ? 2  // Horizontal door  
                         //    : 3; // Vertical door
-                        tileMap[i, j] = 2;
+                        tileMap[i, j] = 0;
                     }
                 }
             }

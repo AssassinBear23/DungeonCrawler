@@ -29,8 +29,25 @@ namespace Dungeon.Generation
 
         public void StartGeneration()
         {
-            CreateFloor();
-            //CreateWalls();
+            StartCoroutine(StartGen());
+        }
+
+        private IEnumerator StartGen()
+        {
+            yield return StartCoroutine(CreateFloor());
+            yield return new WaitForSeconds(DungeonDataGenerator.Instance.GenerationSettings.delaySettings.actionDelay);
+            yield return StartCoroutine(CreateWalls());
+        }
+
+        private void Update()
+        {
+            if (iViz >= 0 && jViz >= 0)
+                VisualizeCurrent(iViz, jViz);
+        }
+
+        private void VisualizeCurrent(int iViz, int jViz)
+        {
+            AlgorithmsUtils.DebugRectInt(new RectInt(iViz, jViz, 2, 2), Color.red, height: 3);
         }
 
         /// <summary>
@@ -101,6 +118,7 @@ namespace Dungeon.Generation
             Instantiate(floorPrefab, new Vector3(position.x + 0.5f, 0, position.y + 0.5f), Quaternion.identity, parentFloor.transform);
         }
 
+        private int iViz, jViz = -1;
 
         /// <summary>
         /// Create the walls of the dungeon using binary operations to check which wall needs to go on the tile.
@@ -111,27 +129,48 @@ namespace Dungeon.Generation
 
             for (int i = 0; i < _tileMap.GetLength(0) - 1; i++)
             {
+                iViz = i;
                 for (int j = 0; j < _tileMap.GetLength(1) - 1; j++)
                 {
+                    jViz = j;
                     if (!AlgorithmsUtils.DoInstantPass() && DungeonDataGenerator.Instance.GenerationSettings.delaySettings.WallPlacement != DelayType.Instant)
                         yield return StartCoroutine(AlgorithmsUtils.Delay(DungeonDataGenerator.Instance.GenerationSettings.delaySettings.WallPlacement));
                     int bitSum = CalculateBitSum(_tileMap, i, j);
+
+                    if (bitSum < 0) continue;
 
                     InstantiateWall(new Vector2(i, j), bitSum);
                 }
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="_tileMap"></param>
+        /// <param name="i"></param>
+        /// <param name="j"></param>
+        /// <returns></returns>
         private static int CalculateBitSum(int[,] _tileMap, int i, int j)
         {
-            return 1 * _tileMap[i, j] + 2 * _tileMap[i + 1, j] + 4 * _tileMap[i, j + 1] + 8 * _tileMap[i + 1, j + 1];
+            //Debug.Log("\n" + _tileMap[i, j + 1] + "\t" + _tileMap[i + 1, j + 1] + "\n" + _tileMap[i, j] + "\t" + _tileMap[i + 1, j]);
+            if (_tileMap[i, j] < 0 || _tileMap[i + 1, j] < 0 || _tileMap[i, j + 1] < 0 || _tileMap[i + 1, j + 1] < 0) return -1;
+            return 1 * _tileMap[i, j + 1]
+                   + 2 * _tileMap[i + 1, j + 1]
+                   + 4 * _tileMap[i, j]
+                   + 8 * _tileMap[i + 1, j];
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="wallIndex"></param>
         private void InstantiateWall(Vector2 position, int wallIndex)
         {
             if (wallPrefabs[wallIndex] == null) return;
 
-
+            Instantiate(wallPrefabs[wallIndex], new Vector3(position.x, 0, position.y), Quaternion.identity, parentWalls.transform);
         }
     }
 }

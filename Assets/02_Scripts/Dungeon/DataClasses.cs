@@ -49,13 +49,15 @@ namespace Dungeon.DataStructures
         [HideIf("UseDefaultDelayType"), AllowNesting]
         public DelayType RoomGeneration;
         [HideIf("UseDefaultDelayType"), AllowNesting]
-        public DelayType RoomRemoval;
-        [HideIf("UseDefaultDelayType"), AllowNesting]
         public DelayType GraphCreation;
         [HideIf("UseDefaultDelayType"), AllowNesting]
-        public DelayType GraphFiltering;
+        public DelayType RoomRemoval;
         [HideIf("UseDefaultDelayType"), AllowNesting]
         public DelayType DoorCreation;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType FloorPlacement;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType WallPlacement;
     }
 
     /// <summary>

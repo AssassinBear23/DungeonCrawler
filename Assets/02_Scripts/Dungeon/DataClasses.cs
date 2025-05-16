@@ -58,6 +58,8 @@ namespace Dungeon.DataStructures
         public DelayType FloorPlacement;
         [HideIf("UseDefaultDelayType"), AllowNesting]
         public DelayType WallPlacement;
+        [HideIf("UseDefaultDelayType"), AllowNesting]
+        public DelayType PathfindingGraphCreation;
     }
 
     /// <summary>
@@ -77,24 +79,37 @@ namespace Dungeon.DataStructures
     }
 
     /// <summary>
-    /// Represents the type of action for which a delay is applied during dungeon generation.
+    /// Specifies the type of delay to be applied during dungeon generation actions.
     /// </summary>
-    public enum DelayAction
-    {
-        RoomGeneration,
-        RoomRemoval,
-        GraphCreation,
-        GraphFiltering,
-        DoorCreation
-    }
-
-    /// <summary>
-    /// Represents the type of delay to be applied during dungeon generation.
-    /// </summary>
+    /// <remarks>
+    /// <list type="bullet">
+    /// <item>
+    /// <term>Instant</term>
+    /// <description>No delay is applied; the action occurs immediately.</description>
+    /// </item>
+    /// <item>
+    /// <term>Delayed</term>
+    /// <description>A fixed time delay is applied before the action occurs.</description>
+    /// </item>
+    /// <item>
+    /// <term>KeyPress</term>
+    /// <description>The action occurs only after a user key press.</description>
+    /// </item>
+    /// </list>
+    /// </remarks>
     public enum DelayType
     {
+        /// <summary>
+        /// No delay; the action is performed instantly.
+        /// </summary>
         Instant,
+        /// <summary>
+        /// The action is performed after a specified delay.
+        /// </summary>
         Delayed,
+        /// <summary>
+        /// The action is performed after a user key press.
+        /// </summary>
         KeyPress
     }
 

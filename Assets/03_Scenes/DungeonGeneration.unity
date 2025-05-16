@@ -631,21 +631,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <DungeonSize>k__BackingField: {x: 20, y: 20}
+  <DungeonSize>k__BackingField: {x: 50, y: 50}
   <GenerationSettings>k__BackingField:
     seed: 420
-    minRoomSize: {x: 4, y: 5}
+    minRoomSize: {x: 4, y: 7}
     doorSize: 2
     delaySettings:
-      actionDelay: 1.02
-      <UseDefaultDelayType>k__BackingField: 0
+      actionDelay: 0.1
+      <UseDefaultDelayType>k__BackingField: 1
       defaultDelayType: 0
       RoomGeneration: 0
-      GraphCreation: 1
+      GraphCreation: 0
       RoomRemoval: 0
       DoorCreation: 0
       FloorPlacement: 0
       WallPlacement: 0
+      PathfindingGraphCreation: 0
   drawDungeon: 0
   drawDoors: 0
   drawDeletedRooms: 0
@@ -765,6 +766,8 @@ MonoBehaviour:
   - {fileID: 0}
   parentWalls: {fileID: 1663865910}
   parentFloor: {fileID: 865651086}
+  iViz: 0
+  jViz: -1
 --- !u!114 &1564286930
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -777,6 +780,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 624eb3de3843dfd448823113c2b56cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  vizualizeGraph: 0
+  iViz: -1
+  jViz: -1
+  graphGenerated: 0
 --- !u!1 &1663865910
 GameObject:
   m_ObjectHideFlags: 0

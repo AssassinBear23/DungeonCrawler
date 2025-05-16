@@ -8,6 +8,9 @@ namespace Utilities
     using Dungeon.DataStructures;
     using System.Collections;
 
+    /// <summary>
+    /// Utility class for various algorithms and operations related to dungeon generation.
+    /// </summary>
     public class AlgorithmsUtils
     {
         /// <summary>
@@ -156,10 +159,21 @@ namespace Utilities
             }
         }
 
-        public static bool DoInstantPass()
+        /// <summary>
+        /// Determines whether the dungeon generation should proceed instantly based on the provided delay type
+        /// and the current delay settings in the generation configuration.
+        /// </summary>
+        /// <param name="passedDelay">
+        /// The delay type to check against the current settings. If set to <see cref="DelayType.Instant"/>,
+        /// the method will return true regardless of the default delay type.
+        /// </param>
+        /// <returns>
+        /// True if the generation should proceed instantly (either the default delay type is set to Instant
+        /// and is being used, or the passed delay type is Instant); otherwise, false.
+        /// </returns>
+        public static bool DoInstantPass(DelayType passedDelay)
         {
-            //Debug.Log("Doing instant pass");
-            return DungeonDataGenerator.Instance.GenerationSettings.delaySettings.UseDefaultDelayType && DungeonDataGenerator.Instance.GenerationSettings.delaySettings.defaultDelayType == DelayType.Instant;
+            return DungeonDataGenerator.Instance.GenerationSettings.delaySettings.UseDefaultDelayType && DungeonDataGenerator.Instance.GenerationSettings.delaySettings.defaultDelayType == DelayType.Instant || passedDelay == DelayType.Instant;
         }
     }
 

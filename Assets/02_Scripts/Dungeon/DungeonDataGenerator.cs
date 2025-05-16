@@ -64,7 +64,7 @@ namespace Dungeon.Data
             {
                 Instance = this;
             }
-            else
+            else if(Instance != this)
             {
                 Destroy(gameObject);
             }
@@ -159,7 +159,7 @@ namespace Dungeon.Data
 
                 SplitRoom(toSplitRoom.roomDimensions, direction, minSize);
 
-                if (!AlgorithmsUtils.DoInstantPass() && GenerationSettings.delaySettings.RoomGeneration != DelayType.Instant)
+                if (!AlgorithmsUtils.DoInstantPass(GenerationSettings.delaySettings.RoomGeneration))
                     yield return StartCoroutine(AlgorithmsUtils.Delay(GenerationSettings.delaySettings.RoomGeneration));
             }
 
@@ -213,7 +213,7 @@ namespace Dungeon.Data
                 }
                 deletedRooms.Add(roomToRemove);
                 ToDrawRooms.Remove(roomToRemove);
-                if (!AlgorithmsUtils.DoInstantPass() && GenerationSettings.delaySettings.RoomRemoval != DelayType.Instant)
+                if (!AlgorithmsUtils.DoInstantPass(GenerationSettings.delaySettings.RoomRemoval))
                     yield return StartCoroutine(AlgorithmsUtils.Delay(GenerationSettings.delaySettings.RoomRemoval));
             }
         }
@@ -266,7 +266,7 @@ namespace Dungeon.Data
                     queue.Enqueue(neighbor);
                     visited.Add(neighbor);
                 }
-                if (!AlgorithmsUtils.DoInstantPass() && GenerationSettings.delaySettings.DoorCreation != DelayType.Instant)
+                if (!AlgorithmsUtils.DoInstantPass(GenerationSettings.delaySettings.DoorCreation))
                     yield return StartCoroutine(AlgorithmsUtils.Delay(GenerationSettings.delaySettings.DoorCreation));
             }
 
@@ -327,7 +327,7 @@ namespace Dungeon.Data
 
                     connections.AddEdge(toCheck[i], toCheck[j]);
                 }
-                if (!AlgorithmsUtils.DoInstantPass() && GenerationSettings.delaySettings.GraphCreation != DelayType.Instant)
+                if (!AlgorithmsUtils.DoInstantPass(GenerationSettings.delaySettings.GraphCreation))
                 {
                     if (drawGraph) VisualizeGraph(connections);
                     yield return StartCoroutine(AlgorithmsUtils.Delay(GenerationSettings.delaySettings.GraphCreation));

@@ -9,7 +9,7 @@ namespace Player.Pathfinding
     public class PathFinder : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private GraphGenerator graphGenerator;
+        [SerializeField] private PathfindingGraphGenerator graphGenerator;
 
         [Header("Pathfinding Settings")]
         [SerializeField] private Algorithms toUseAlgorithm = Algorithms.AStar;
@@ -25,7 +25,7 @@ namespace Player.Pathfinding
 
         void Start()
         {
-            graphGenerator = GetComponent<GraphGenerator>();
+            graphGenerator = GetComponent<PathfindingGraphGenerator>();
             graph = graphGenerator.Graph;
         }
 

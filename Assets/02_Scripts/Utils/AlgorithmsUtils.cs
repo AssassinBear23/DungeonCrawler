@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Dungeon.HelperMethods
+namespace Utilities
 {
     using Dungeon.Data;
     using Dungeon.DataStructures;

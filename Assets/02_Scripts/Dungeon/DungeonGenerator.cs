@@ -6,7 +6,7 @@ namespace Dungeon.Generation
 {
     using Dungeon.Data;
     using Dungeon.DataStructures;
-    using Dungeon.HelperMethods;
+    using Utilities;
     using System;
     using System.Collections;
 

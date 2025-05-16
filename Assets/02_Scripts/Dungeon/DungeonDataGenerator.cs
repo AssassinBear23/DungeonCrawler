@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Dungeon.Data
 {
     using DataStructures;
-    using Dungeon.HelperMethods;
+    using Utilities;
     using System;
     using System.Linq;
     using UnityEngine.Events;

@@ -611,6 +611,7 @@ GameObject:
   - component: {fileID: 1564286926}
   - component: {fileID: 1564286928}
   - component: {fileID: 1564286929}
+  - component: {fileID: 1564286930}
   m_Layer: 0
   m_Name: DungeonGenerator
   m_TagString: Untagged
@@ -630,27 +631,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <DungeonSize>k__BackingField: {x: 100, y: 500}
+  <DungeonSize>k__BackingField: {x: 20, y: 20}
   <GenerationSettings>k__BackingField:
     seed: 420
-    minRoomSize: {x: 4, y: 20}
+    minRoomSize: {x: 4, y: 5}
     doorSize: 2
     delaySettings:
-      actionDelay: 0.01
-      <UseDefaultDelayType>k__BackingField: 1
+      actionDelay: 1.02
+      <UseDefaultDelayType>k__BackingField: 0
       defaultDelayType: 0
       RoomGeneration: 0
-      GraphCreation: 0
+      GraphCreation: 1
       RoomRemoval: 0
       DoorCreation: 0
       FloorPlacement: 0
-      WallPlacement: 2
-  drawDungeon: 1
-  drawDoors: 1
+      WallPlacement: 0
+  drawDungeon: 0
+  drawDoors: 0
   drawDeletedRooms: 0
   drawUnreachableRooms: 0
-  drawStarterRoom: 1
-  drawGraph: 1
+  drawStarterRoom: 0
+  drawGraph: 0
   toSplitRooms: []
   <ToDrawRooms>k__BackingField: []
   deletedRooms: []
@@ -718,6 +719,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1564286930}
+        m_TargetAssemblyTypeName: Player.Pathfinding.GraphGenerator, Assembly-CSharp
+        m_MethodName: GenerateGraph
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1564286929
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -752,6 +765,18 @@ MonoBehaviour:
   - {fileID: 0}
   parentWalls: {fileID: 1663865910}
   parentFloor: {fileID: 865651086}
+--- !u!114 &1564286930
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564286925}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 624eb3de3843dfd448823113c2b56cfd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1663865910
 GameObject:
   m_ObjectHideFlags: 0
@@ -808,7 +833,7 @@ Transform:
   m_GameObject: {fileID: 2044734881}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 45.31124, y: -0.000005257125, z: 44.10021}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

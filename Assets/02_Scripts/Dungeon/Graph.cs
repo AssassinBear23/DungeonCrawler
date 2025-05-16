@@ -39,7 +39,7 @@ namespace Dungeon.DataStructures
         {
             if (adjacencies.ContainsKey(node))
             {
-                Debug.Log("Node already exists in graph");
+                //debug.log("Node already exists in graph");
                 return;
             }
             adjacencies[node] = new List<T>();
@@ -54,7 +54,7 @@ namespace Dungeon.DataStructures
         {
             if (!adjacencies.ContainsKey(fromNode) || !adjacencies.ContainsKey(toNode))
             {
-                Debug.Log("One or both nodes do not exist in graph");
+                ////debug.log("One or both nodes do not exist in graph");
                 return;
             }
             adjacencies[fromNode].Add(toNode);
@@ -79,7 +79,7 @@ namespace Dungeon.DataStructures
         {
             if (!adjacencies.ContainsKey(node))
             {
-                Debug.Log("Node does not exist in graph");
+                ////debug.log("Node does not exist in graph");
                 return null;
             }
             return adjacencies[node];

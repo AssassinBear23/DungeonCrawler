@@ -1,15 +1,14 @@
 using NaughtyAttributes;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Dungeon.Data
 {
     using DataStructures;
     using Utilities;
-    using System;
-    using System.Linq;
-    using UnityEngine.Events;
 
     /// <summary>
     /// Class that's responsible for generating a dungeon. It makes use of <see cref="Room">Room</see> and <see cref="Graph{T}">Graph</see> classes.
@@ -20,7 +19,8 @@ namespace Dungeon.Data
         [HideInInspector] public static DungeonDataGenerator Instance { get; private set; }
         [field: Header("Dungeon Settings")]
         [field: SerializeField] public Vector2Int DungeonSize { get; private set; } = new(100, 100);
-        [field: SerializeField] public GenerationSettings GenerationSettings { get; private set; } 
+        public RectInt GetDugneonBounds => new(new Vector2Int((int)transform.position.x, (int)transform.position.z ), DungeonSize);
+        [field: SerializeField] public GenerationSettings GenerationSettings { get; private set; }
         [Space(10), HorizontalLine(height: 1)]
         [Header("Visualization")]
         [SerializeField] private bool drawDungeon;
@@ -41,7 +41,7 @@ namespace Dungeon.Data
         [HorizontalLine(height: 1)]
         [Header("Events")]
         [SerializeField] private UnityEvent onDungeonGenerationStart;
-        private Random _random;
+        private System.Random _random;
 
         /// <summary>
         /// Coroutine that starts the dungeon generation process.
@@ -53,7 +53,7 @@ namespace Dungeon.Data
             SetupSingleton();
 
             Reset();
-            _random = new Random(GenerationSettings.seed);
+            _random = new(GenerationSettings.seed);
             CreateOuterBounds();
             yield return StartCoroutine(AssignmentOrder());
         }
@@ -64,7 +64,7 @@ namespace Dungeon.Data
             {
                 Instance = this;
             }
-            else if(Instance != this)
+            else if (Instance != this)
             {
                 Destroy(gameObject);
             }
@@ -76,7 +76,7 @@ namespace Dungeon.Data
         [Button("New Random Seed", EButtonEnableMode.Always)]
         private void NewSeed()
         {
-            _random = new Random(GenerationSettings.seed);
+            _random = new(GenerationSettings.seed);
             GenerationSettings.seed = _random.Next(0, 100000);
             Reset();
             CreateOuterBounds();
@@ -131,7 +131,7 @@ namespace Dungeon.Data
             toSplitRooms.Add(new(new(0, 0, DungeonSize.x, DungeonSize.y)));
         }
 
-        
+
 
         /// <summary>
         /// Coroutine that splits the rooms in the dungeon.

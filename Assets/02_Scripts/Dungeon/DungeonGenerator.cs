@@ -1,13 +1,13 @@
 using NaughtyAttributes;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Dungeon.Generation
 {
-    using Dungeon.Data;
-    using Dungeon.DataStructures;
-    using System;
-    using System.Collections;
+    using Data;
+    using DataStructures;
     using Utilities;
 
     /// <summary>
@@ -52,6 +52,17 @@ namespace Dungeon.Generation
             yield return StartCoroutine(CreateFloor());
             yield return new WaitForSeconds(DungeonDataGenerator.Instance.GenerationSettings.delaySettings.actionDelay);
             yield return StartCoroutine(CreateWalls());
+            CreateCollider();
+        }
+
+        private void CreateCollider()
+        {
+
+            RectInt bounds = DungeonDataGenerator.Instance.GetDugneonBounds;
+
+            BoxCollider boxCollider = parentFloor.AddComponent<BoxCollider>();
+            boxCollider.size = new Vector3(bounds.width , 1, bounds.height );
+            boxCollider.center = new Vector3(bounds.center.x, -.5f, bounds.center.y);
         }
 
         /// <summary>

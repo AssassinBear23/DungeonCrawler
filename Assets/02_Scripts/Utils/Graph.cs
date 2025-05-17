@@ -16,7 +16,7 @@ namespace Dungeon.DataStructures
         [SerializeField] private SerializedDictionary<T, List<T>> adjacencies;
 
         /// <summary>
-        /// Creates a new graph.
+        /// Creates a new instance of the <see cref="Graph{T}"/> class.
         /// </summary>
         public Graph()
         {
@@ -39,7 +39,6 @@ namespace Dungeon.DataStructures
         {
             if (adjacencies.ContainsKey(node))
             {
-                //debug.log("Node already exists in graph");
                 return;
             }
             adjacencies[node] = new List<T>();
@@ -62,7 +61,7 @@ namespace Dungeon.DataStructures
         }
 
         /// <summary>
-        /// Gets the number of nodes in the graph.
+        /// Returns the amount of nodes in the graph.
         /// </summary>
         /// <returns>The number of nodes in the graph.</returns>
         public int GetNodeCount()

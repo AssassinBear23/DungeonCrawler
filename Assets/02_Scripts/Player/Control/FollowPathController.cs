@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Player.Movement
 {
-    using Player.Pathfinding;
+    using Pathfinding;
 
     public class FollowPathController : MonoBehaviour
     {

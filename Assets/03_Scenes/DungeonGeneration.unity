@@ -131,31 +131,13 @@ GameObject:
   - component: {fileID: 313385168}
   - component: {fileID: 313385167}
   - component: {fileID: 313385166}
-  - component: {fileID: 313385165}
-  - component: {fileID: 313385170}
   m_Layer: 0
-  m_Name: Player
+  m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &313385165
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 313385164}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7cfc9e27dd6ad475b823b5664fec6bea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  clickPosition: {x: 0, y: 0, z: 0}
-  OnClick:
-    m_PersistentCalls:
-      m_Calls: []
+  m_IsActive: 1
 --- !u!136 &313385166
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -240,27 +222,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 313385164}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.3792245, y: 280.2135, z: 345.9043}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1625450898}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &313385170
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 313385164}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09d37d04c9c82204c89ba6905e5c7633, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pathFinder: {fileID: 0}
-  speed: 5
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -323,7 +291,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -347,13 +315,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 5, y: 10, z: 5}
+  m_LocalRotation: {x: 0.60876137, y: 0, z: 0, w: 0.7933534}
+  m_LocalPosition: {x: 0, y: 10, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_Father: {fileID: 1625450898}
+  m_LocalEulerAnglesHint: {x: 75, y: 0, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -631,10 +599,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <DungeonSize>k__BackingField: {x: 50, y: 50}
+  <DungeonSize>k__BackingField: {x: 100, y: 100}
   <GenerationSettings>k__BackingField:
     seed: 420
-    minRoomSize: {x: 4, y: 7}
+    minRoomSize: {x: 4, y: 20}
     doorSize: 2
     delaySettings:
       actionDelay: 0.1
@@ -721,7 +689,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 1564286930}
-        m_TargetAssemblyTypeName: Player.Pathfinding.GraphGenerator, Assembly-CSharp
+        m_TargetAssemblyTypeName: Player.Pathfinding.PathfindingGraphGenerator, Assembly-CSharp
         m_MethodName: GenerateGraph
         m_Mode: 1
         m_Arguments:
@@ -784,6 +752,103 @@ MonoBehaviour:
   iViz: -1
   jViz: -1
   graphGenerated: 0
+--- !u!1 &1625450897
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1625450898}
+  - component: {fileID: 1625450902}
+  - component: {fileID: 1625450901}
+  - component: {fileID: 1625450900}
+  m_Layer: 0
+  m_Name: Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1625450898
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1625450897}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3, y: 0, z: 2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 313385169}
+  - {fileID: 330585546}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1625450900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1625450897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb3210f71bf62452b9b69dcdeb43cfa1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  graphGenerator: {fileID: 1564286930}
+  path: []
+  graph:
+    adjacencies:
+      _serializedList: []
+  startNode: {x: 0, y: 0, z: 0}
+  endNode: {x: 0, y: 0, z: 0}
+--- !u!114 &1625450901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1625450897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09d37d04c9c82204c89ba6905e5c7633, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pathFinder: {fileID: 1625450900}
+  speed: 5
+--- !u!114 &1625450902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1625450897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cfc9e27dd6ad475b823b5664fec6bea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clickPosition: {x: 0, y: 0, z: 0}
+  OnClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1625450901}
+        m_TargetAssemblyTypeName: Player.Movement.FollowPathController, Assembly-CSharp
+        m_MethodName: GoToDestination
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1663865910
 GameObject:
   m_ObjectHideFlags: 0
@@ -852,9 +917,8 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 1564286927}
   - {fileID: 2044734882}
-  - {fileID: 313385169}
+  - {fileID: 1625450898}

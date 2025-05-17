@@ -1,12 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Utilities
+namespace Dungeon.Utilities
 {
-    using Dungeon.Data;
-    using Dungeon.DataStructures;
-    using System.Collections;
+    using Data;
+    using DataStructures;
 
     /// <summary>
     /// Utility class for various algorithms and operations related to dungeon generation.

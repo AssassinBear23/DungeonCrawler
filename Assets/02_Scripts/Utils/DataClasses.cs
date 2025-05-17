@@ -122,4 +122,6 @@ namespace Dungeon.DataStructures
         Vertical = 1 << 0,
         Horizontal = 1 << 1
     }
+
+
 }

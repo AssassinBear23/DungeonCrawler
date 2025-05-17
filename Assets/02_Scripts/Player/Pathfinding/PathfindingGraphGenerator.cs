@@ -1,11 +1,11 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Player.Pathfinding
 {
     using Dungeon.Data;
     using Dungeon.DataStructures;
-    using System.Collections;
-    using Utilities;
+    using Dungeon.Utilities;
 
     /// <summary>
     /// Generates a pathfinding graph from a dungeon tile map, supporting both cardinal and diagonal connections.

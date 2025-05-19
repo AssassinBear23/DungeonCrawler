@@ -1,7 +1,7 @@
-using AYellowpaper.SerializedCollections;
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Text;
 using UnityEngine;
 
 namespace Dungeon.DataStructures
@@ -16,7 +16,7 @@ namespace Dungeon.DataStructures
         /// <summary>
         /// Stores the elements and their associated priority values.
         /// </summary>
-        [SerializeField] private SerializedDictionary<T, float> keyPriorityPairs;
+        [SerializeField] private Dictionary<T, float> keyPriorityPairs;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PriorityQueue{T}"/> class.
@@ -54,7 +54,18 @@ namespace Dungeon.DataStructures
         /// </summary>
         private void SortByPriority()
         {
-            keyPriorityPairs.OrderBy(keyValuePair => keyValuePair.Value);
+            keyPriorityPairs = keyPriorityPairs.OrderBy(keyValuePair => keyValuePair.Value).ToDictionary(keyValuePair => keyValuePair.Key, keyValuePair => keyValuePair.Value);
+            PrintDictionary();
+        }
+
+        private void PrintDictionary()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var kvp in keyPriorityPairs)
+            {
+                sb.AppendLine($"Key: {kvp.Key}, Priority: {kvp.Value}");
+            }
+            Debug.Log(sb.ToString());
         }
 
         /// <summary>

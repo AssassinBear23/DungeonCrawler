@@ -599,10 +599,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac71139d69036743a4db29c81b82fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <DungeonSize>k__BackingField: {x: 100, y: 100}
+  <DungeonSize>k__BackingField: {x: 50, y: 50}
   <GenerationSettings>k__BackingField:
-    seed: 420
-    minRoomSize: {x: 4, y: 20}
+    seed: 0
+    minRoomSize: {x: 4, y: 10}
     doorSize: 2
     delaySettings:
       actionDelay: 0.1
@@ -732,9 +732,9 @@ MonoBehaviour:
   - {fileID: 7586872566478231117, guid: 43b77e1bcffb7b84596d7433f581ba97, type: 3}
   - {fileID: 4879426794188790429, guid: a13d3b6785a3c4d4591d430aee149302, type: 3}
   - {fileID: 0}
-  parentWalls: {fileID: 1663865910}
+  parentWalls: {fileID: 2044734881}
   parentFloor: {fileID: 865651086}
-  iViz: 0
+  iViz: -1
   jViz: -1
 --- !u!114 &1564286930
 MonoBehaviour:
@@ -802,9 +802,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   graphGenerator: {fileID: 1564286930}
   path: []
-  graph:
-    adjacencies:
-      _serializedList: []
+  costDictionary:
+    _serializedList: []
+  showDiscovered: 0
+  showPath: 0
   startNode: {x: 0, y: 0, z: 0}
   endNode: {x: 0, y: 0, z: 0}
 --- !u!114 &1625450901
@@ -837,6 +838,18 @@ MonoBehaviour:
   OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 1625450901}
+        m_TargetAssemblyTypeName: Player.Movement.FollowPathController, Assembly-CSharp
+        m_MethodName: StopMoving
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 1625450901}
         m_TargetAssemblyTypeName: Player.Movement.FollowPathController, Assembly-CSharp
         m_MethodName: GoToDestination

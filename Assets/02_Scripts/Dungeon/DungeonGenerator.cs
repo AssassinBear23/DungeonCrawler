@@ -32,14 +32,14 @@ namespace Dungeon.Generation
         [SerializeField] private GameObject parentFloor;
 
         [Header("Debug")]
-        [SerializeField] private int iViz, jViz = -1;
+        [SerializeField] private int iViz = -1;
+        [SerializeField] private int jViz = -1;
 
         /// <summary>
         /// Starts the dungeon generation process by clearing the current dungeon and starting the generation coroutine.
         /// </summary>
         public void StartGeneration()
         {
-            ClearCurrent();
             StartCoroutine(StartGen());
         }
 
@@ -58,17 +58,17 @@ namespace Dungeon.Generation
         private void CreateCollider()
         {
 
-            RectInt bounds = DungeonDataGenerator.Instance.GetDugneonBounds;
+            RectInt bounds = DungeonDataGenerator.Instance.GetDungeonBounds;
 
             BoxCollider boxCollider = parentFloor.AddComponent<BoxCollider>();
-            boxCollider.size = new Vector3(bounds.width , 1, bounds.height );
+            boxCollider.size = new Vector3(bounds.width, 1, bounds.height);
             boxCollider.center = new Vector3(bounds.center.x, -.5f, bounds.center.y);
         }
 
         /// <summary>
         /// Clears the current dungeon by destroying all child objects of the parent floor and walls.
         /// </summary>
-        private void ClearCurrent()
+        public void ClearCurrent()
         {
             for (int i = 0; i < parentFloor.transform.childCount; i++)
             {

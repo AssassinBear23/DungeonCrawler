@@ -1,9 +1,11 @@
+using AYellowpaper.SerializedCollections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Player.Pathfinding
 {
     using Dungeon.DataStructures;
+    using UnityEditor;
 
     /// <summary>
     /// Handles pathfinding logic for the player using an A* algorithm on a generated graph.
@@ -15,8 +17,12 @@ namespace Player.Pathfinding
 
         [Header("Debug Variables")]
         [SerializeField] private List<Vector3> path = new();
-        [SerializeField] private Graph<Vector3> graph;
+        [SerializeField] private SerializedDictionary<Vector3, float> costDictionary = new();
+        private Graph<Vector3> graph;
+        [SerializeField] private bool showDiscovered;
+        [SerializeField] private bool showPath;
 
+        [Space(10)]
         [SerializeField] private Vector3 startNode;
         [SerializeField] private Vector3 endNode;
 
@@ -24,6 +30,8 @@ namespace Player.Pathfinding
         /// Set of nodes discovered during pathfinding, used for debugging and visualization.
         /// </summary>
         private HashSet<Vector3> discovered = new();
+        
+
 
         /// <summary>
         /// Initializes the pathfinder by retrieving the graph generator and its graph.
@@ -89,10 +97,10 @@ namespace Player.Pathfinding
         private List<Vector3> AStar(Vector3 start, Vector3 end)
         {
             discovered.Clear();
+            costDictionary.Clear();
 
             Graph<Vector3> graph = graphGenerator.Graph;
             PriorityQueue<Vector3> priorityQueue = new();
-            Dictionary<Vector3, float> costDictionary = new();
             Dictionary<Vector3, Vector3> pathDictionary = new();
 
             Vector3 current = start;
@@ -110,7 +118,7 @@ namespace Player.Pathfinding
                 foreach (Vector3 neighbour in graph.GetNeighbours(current))
                 {
                     float newCost = costDictionary[current] + Cost(current, neighbour);
-                    if (costDictionary[neighbour] == 0 || newCost < costDictionary[neighbour])
+                    if (!costDictionary.ContainsKey(neighbour) || newCost < costDictionary[neighbour])
                     {
                         costDictionary[neighbour] = newCost;
                         pathDictionary[neighbour] = current;
@@ -177,7 +185,7 @@ namespace Player.Pathfinding
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(endNode, .3f);
 
-            if (discovered != null)
+            if (discovered != null && showDiscovered)
             {
                 foreach (var node in discovered)
                 {
@@ -186,7 +194,7 @@ namespace Player.Pathfinding
                 }
             }
 
-            if (path != null)
+            if (path != null && showPath)
             {
                 foreach (var node in path)
                 {
@@ -194,6 +202,17 @@ namespace Player.Pathfinding
                     Gizmos.DrawSphere(node, .3f);
                 }
             }
+
+#if UNITY_EDITOR
+            if (costDictionary.Count != 0)
+            {
+                foreach (var kvp in costDictionary)
+                {
+                    Gizmos.color = Color.white;
+                    Handles.Label(new(kvp.Key.x, kvp.Key.y + .5f, kvp.Key.z), kvp.Value.ToString());
+                }
+            }
+#endif
         }
     }
 }

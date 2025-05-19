@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Player.Movement
 {
     using Pathfinding;
+    using Unity.Hierarchy;
 
     public class FollowPathController : MonoBehaviour
     {
@@ -25,7 +26,16 @@ namespace Player.Movement
             }
         }
 
-        IEnumerator FollowPathCoroutine(List<Vector3> path)
+        public void StopMoving()
+        {
+            if (isMoving)
+            {
+                StopAllCoroutines();
+                isMoving = false;
+            }
+        }
+
+            IEnumerator FollowPathCoroutine(List<Vector3> path)
         {
             if (path == null || path.Count == 0)
             {
@@ -42,8 +52,7 @@ namespace Player.Movement
                     transform.position = Vector3.MoveTowards(transform.position, target, Time.deltaTime * speed);
                     yield return null;
                 }
-
-                Debug.Log($"Reached target: {target}");
+                //Debug.Log($"Reached target: {target}");
             }
             isMoving = false;
         }

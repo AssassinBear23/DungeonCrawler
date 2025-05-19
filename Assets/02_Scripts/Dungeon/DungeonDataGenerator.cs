@@ -8,6 +8,7 @@ using UnityEngine.Events;
 namespace Dungeon.Data
 {
     using DataStructures;
+    using Dungeon.Generation;
     using Utilities;
 
     /// <summary>
@@ -19,7 +20,7 @@ namespace Dungeon.Data
         [HideInInspector] public static DungeonDataGenerator Instance { get; private set; }
         [field: Header("Dungeon Settings")]
         [field: SerializeField] public Vector2Int DungeonSize { get; private set; } = new(100, 100);
-        public RectInt GetDugneonBounds => new(new Vector2Int((int)transform.position.x, (int)transform.position.z ), DungeonSize);
+        public RectInt GetDungeonBounds => new(new Vector2Int((int)transform.position.x, (int)transform.position.z ), DungeonSize);
         [field: SerializeField] public GenerationSettings GenerationSettings { get; private set; }
         [Space(10), HorizontalLine(height: 1)]
         [Header("Visualization")]
@@ -74,10 +75,11 @@ namespace Dungeon.Data
         /// Creates a new random seed for the dungeon generation process.
         /// </summary>
         [Button("New Random Seed", EButtonEnableMode.Always)]
-        private void NewSeed()
+        public void NewSeed()
         {
             _random = new(GenerationSettings.seed);
             GenerationSettings.seed = _random.Next(0, 100000);
+            transform.GetComponent<DungeonGenerator>().ClearCurrent();
             Reset();
             CreateOuterBounds();
             StartCoroutine(AssignmentOrder());
@@ -122,7 +124,6 @@ namespace Dungeon.Data
         }
 
         #region Methods
-
         /// <summary>
         /// Sets the outer bounds of the dungeon. Dictated by <see cref="DungeonSize">dungeonSize</see> variable.
         /// </summary>
@@ -130,8 +131,6 @@ namespace Dungeon.Data
         {
             toSplitRooms.Add(new(new(0, 0, DungeonSize.x, DungeonSize.y)));
         }
-
-
 
         /// <summary>
         /// Coroutine that splits the rooms in the dungeon.
@@ -343,7 +342,6 @@ namespace Dungeon.Data
             mainGraph = connections;
         }
         #endregion Methods
-
         #region Visualization
         /// <summary>
         /// Visualizes the rooms in the dungeon.

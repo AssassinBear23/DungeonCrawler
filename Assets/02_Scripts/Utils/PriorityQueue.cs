@@ -52,10 +52,11 @@ namespace Dungeon.DataStructures
         /// <summary>
         /// Sorts the elements in the priority queue by their priority values in ascending order.
         /// </summary>
-        private void SortByPriority()
+        private void SortByPriority(bool printToConsole = false)
         {
             keyPriorityPairs = keyPriorityPairs.OrderBy(keyValuePair => keyValuePair.Value).ToDictionary(keyValuePair => keyValuePair.Key, keyValuePair => keyValuePair.Value);
-            PrintDictionary();
+            if (printToConsole)
+                PrintDictionary();
         }
 
         private void PrintDictionary()
@@ -81,6 +82,32 @@ namespace Dungeon.DataStructures
             }
 
             SortByPriority();
+
+            var minPair = keyPriorityPairs.First();
+            keyPriorityPairs.Remove(minPair.Key);
+            return minPair.Key;
+        }
+
+        /// <summary>
+        /// Removes and returns the element with the highest priority (lowest priority value) from the priority queue.
+        /// </summary>
+        /// <param name="printToConsole">
+        /// If set to <c>true</c>, prints the contents of the priority queue to the console after sorting.
+        /// </param>
+        /// <returns>
+        /// The element with the highest priority.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the priority queue is empty.
+        /// </exception>
+        public T Dequeue(bool printToConsole)
+        {
+            if (keyPriorityPairs.Count == 0)
+            {
+                throw new InvalidOperationException("The priority queue is empty.");
+            }
+
+            SortByPriority(printToConsole);
 
             var minPair = keyPriorityPairs.First();
             keyPriorityPairs.Remove(minPair.Key);

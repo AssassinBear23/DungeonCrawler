@@ -8,7 +8,7 @@ using UnityEngine.Events;
 namespace Dungeon.Data
 {
     using DataStructures;
-    using Dungeon.Generation;
+    using Generation;
     using Utilities;
 
     /// <summary>

@@ -47,7 +47,7 @@ namespace Player.Pathfinding
                 for (int y = dungeonBounds.yMin; y < dungeonBounds.yMax; y++)
                 {
                     jViz = y;
-                    Vector3 currentPosition = new(x, 0, y);
+                    Vector3 currentPosition = new(x + .5f, 0, y + .5f);
 
                     if (tileMap[x, y] != 0) continue;
 
@@ -178,7 +178,7 @@ namespace Player.Pathfinding
 
             if (!graphGenerated || !vizualizeGraph) return;
 
-            float offset = .5f;
+            float offset = 0;
             foreach (var node in Graph.GetNodes())
             {
                 Vector3 nodeOffset = new(node.x + offset, node.y, node.z + offset);

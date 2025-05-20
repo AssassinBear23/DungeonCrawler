@@ -20,7 +20,7 @@ namespace Dungeon.Data
         [HideInInspector] public static DungeonDataGenerator Instance { get; private set; }
         [field: Header("Dungeon Settings")]
         [field: SerializeField] public Vector2Int DungeonSize { get; private set; } = new(100, 100);
-        public RectInt GetDungeonBounds => new(new Vector2Int((int)transform.position.x, (int)transform.position.z ), DungeonSize);
+        public RectInt GetDungeonBounds => new(new Vector2Int((int)transform.position.x, (int)transform.position.z), DungeonSize);
         [field: SerializeField] public GenerationSettings GenerationSettings { get; private set; }
         [Space(10), HorizontalLine(height: 1)]
         [Header("Visualization")]
@@ -79,7 +79,8 @@ namespace Dungeon.Data
         {
             _random = new(GenerationSettings.seed);
             GenerationSettings.seed = _random.Next(0, 100000);
-            transform.GetComponent<DungeonGenerator>().ClearCurrent();
+            if (Application.isPlaying)
+                transform.GetComponent<DungeonGenerator>().ClearCurrent();
             Reset();
             CreateOuterBounds();
             StartCoroutine(AssignmentOrder());

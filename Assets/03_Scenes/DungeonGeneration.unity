@@ -606,8 +606,8 @@ MonoBehaviour:
     doorSize: 2
     delaySettings:
       actionDelay: 0.1
-      <UseDefaultDelayType>k__BackingField: 1
-      defaultDelayType: 0
+      <UseDefaultDelayType>k__BackingField: 0
+      defaultDelayType: 2
       RoomGeneration: 0
       GraphCreation: 0
       RoomRemoval: 0
@@ -672,10 +672,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dungeonGenerator: {fileID: 1564286926}
-  arrayFlippingDirections: 0
+  arrayFlippingDirections: -1
+  printMap: 1
   onTileMapGenerated:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 1564286928}
+        m_TargetAssemblyTypeName: Dungeon.Data.TileMapGenerator, Assembly-CSharp
+        m_MethodName: PrintTileMap
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 1564286929}
         m_TargetAssemblyTypeName: Dungeon.Generation.DungeonGenerator, Assembly-CSharp
         m_MethodName: StartGeneration
@@ -748,10 +761,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 624eb3de3843dfd448823113c2b56cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vizualizeGraph: 0
+  vizualizeGraph: 1
   iViz: -1
   jViz: -1
-  graphGenerated: 0
+  graphGenerated: 1
 --- !u!1 &1625450897
 GameObject:
   m_ObjectHideFlags: 0
@@ -780,7 +793,7 @@ Transform:
   m_GameObject: {fileID: 1625450897}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3, y: 0, z: 2}
+  m_LocalPosition: {x: 3.5, y: 0, z: 2.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -806,6 +819,7 @@ MonoBehaviour:
     _serializedList: []
   showDiscovered: 0
   showPath: 0
+  showCost: 0
   startNode: {x: 0, y: 0, z: 0}
   endNode: {x: 0, y: 0, z: 0}
 --- !u!114 &1625450901

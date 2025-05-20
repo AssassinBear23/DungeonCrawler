@@ -21,6 +21,7 @@ namespace Player.Pathfinding
         private Graph<Vector3> graph;
         [SerializeField] private bool showDiscovered;
         [SerializeField] private bool showPath;
+        [SerializeField] private bool showCost;
 
         [Space(10)]
         [SerializeField] private Vector3 startNode;
@@ -30,7 +31,7 @@ namespace Player.Pathfinding
         /// Set of nodes discovered during pathfinding, used for debugging and visualization.
         /// </summary>
         private HashSet<Vector3> discovered = new();
-        
+
 
 
         /// <summary>
@@ -204,7 +205,7 @@ namespace Player.Pathfinding
             }
 
 #if UNITY_EDITOR
-            if (costDictionary.Count != 0)
+            if (costDictionary.Count != 0 && showCost)
             {
                 foreach (var kvp in costDictionary)
                 {

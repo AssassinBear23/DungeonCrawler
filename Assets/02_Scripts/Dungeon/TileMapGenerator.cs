@@ -1,11 +1,13 @@
-﻿using Dungeon.DataStructures;
-using NaughtyAttributes;
+﻿using NaughtyAttributes;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Dungeon.Data
 {
+    using DataStructures;
+
+
     /// <summary>
     /// Generates a tile map based on the dungeon generator's data.
     /// </summary>
@@ -17,6 +19,7 @@ namespace Dungeon.Data
 
         [Header("Generation Settings")]
         [SerializeField] private Direction arrayFlippingDirections;
+        [SerializeField] private bool printMap;
 
         [Header("Events")]
         [SerializeField] private UnityEvent onTileMapGenerated;
@@ -27,17 +30,11 @@ namespace Dungeon.Data
         [Button]
         public void GenerateTileMap()
         {
-            int[,] _tileMap = new int[dungeonGenerator.DungeonSize.x, dungeonGenerator.DungeonSize.y];
+            TileMap = new int[dungeonGenerator.DungeonSize.x, dungeonGenerator.DungeonSize.y];
 
-            /*  TODO: generate a tile map.
-                Method: Get every rooms data, and then fill it into the tile map. Door data overrides it after filling in doors with a "|" or "-".
-            */
-
-            BlankFill(_tileMap);
-            GenerateRooms(_tileMap);
-            GenerateDoors(_tileMap);
-
-            TileMap = FlipArray(_tileMap, arrayFlippingDirections.HasFlag(Direction.Vertical), arrayFlippingDirections.HasFlag(Direction.Horizontal));
+            BlankFill(TileMap);
+            GenerateRooms(TileMap);
+            GenerateDoors(TileMap);
 
             onTileMapGenerated?.Invoke();
         }
@@ -103,26 +100,6 @@ namespace Dungeon.Data
             }
         }
 
-        int[,] FlipArray(int[,] _tileMap, bool flipVert = false, bool flipHor = false)
-        {
-            int rows = _tileMap.GetLength(0);
-            int cols = _tileMap.GetLength(1);
-
-            int[,] flippedTileMap = new int[rows, cols];
-
-            for (int j = 0; j != cols; j++)
-            {
-                for (int i = 0; i != rows; i++)
-                {
-                    int flippedI = flipVert ? rows - 1 - i : i;
-                    int flippedJ = flipHor ? cols - 1 - j : j;
-
-                    flippedTileMap[flippedI, flippedJ] = _tileMap[i, j];
-                }
-            }
-
-            return flippedTileMap;
-        }
 
         /// <summary>
         /// Converts the generated tile map into a string representation.
@@ -130,8 +107,9 @@ namespace Dungeon.Data
         /// <param name="flipVert">If true, flips the tile map vertically.</param>
         /// <param name="flipHor">If true, flips the tile map horizontally.</param>
         /// <returns>A string representation of the tile map, where different symbols represent different tile types.</returns>
-        public string ToString(bool flipVert = false, bool flipHor = true)
+        new private string ToString()
         {
+            if (printMap) return null;
             if (TileMap == null) return "Tile map not generated yet.";
 
             int rows = TileMap.GetLength(0);
@@ -139,9 +117,20 @@ namespace Dungeon.Data
 
             var sb = new StringBuilder();
 
-            for (int j = 0; j != cols; j++)
+            bool flipVert = arrayFlippingDirections.HasFlag(Direction.Vertical);
+            bool flipHor = arrayFlippingDirections.HasFlag(Direction.Horizontal);
+
+            int startVert = flipVert ? rows - 1 : 0;
+            int endVert = flipVert ? -1 : rows;
+            int stepVert = flipVert ? -1 : 1;
+
+            int startHor = flipHor ? cols - 1 : 0;
+            int endHor = flipHor ? -1 : cols;
+            int stepHor = flipHor ? -1 : 1;
+
+            for (int j = startHor; j != endHor; j += stepHor)
             {
-                for (int i = 0; i != rows; i++)
+                for (int i = startVert; i != endVert; i += stepVert)
                 {
                     switch (TileMap[i, j])
                     {

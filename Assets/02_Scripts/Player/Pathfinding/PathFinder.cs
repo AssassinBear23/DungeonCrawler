@@ -4,7 +4,9 @@ using UnityEngine;
 
 namespace Player.Pathfinding
 {
+    using Dungeon.Data;
     using Dungeon.DataStructures;
+    using Dungeon.Utilities;
     using UnityEditor;
 
     /// <summary>
@@ -41,6 +43,11 @@ namespace Player.Pathfinding
         {
             //graphGenerator = GetComponent<PathfindingGraphGenerator>();
             graph = graphGenerator.Graph;
+        }
+
+        public void SetPlayerPosition()
+        {
+            transform.position = AlgorithmsUtils.CalculateMiddlePosition(DungeonDataGenerator.Instance.StarterRoom);
         }
 
         /// <summary>

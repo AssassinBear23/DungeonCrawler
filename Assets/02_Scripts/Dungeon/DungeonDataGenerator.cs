@@ -30,6 +30,10 @@ namespace Dungeon.Data
         [SerializeField] private bool drawUnreachableRooms;
         [SerializeField] private bool drawStarterRoom;
         [SerializeField] private bool drawGraph;
+        [HorizontalLine(height: 1)]
+        [Header("Events")]
+        [SerializeField] private UnityEvent OnDataGenerationFinished;
+        [SerializeField] private UnityEvent<Vector3> OnDataGenerationFinishedVector3;
         [Space(10), HorizontalLine(height: 1)]
         [Header("Debugging Lists")]
         [SerializeField] private List<Room> toSplitRooms = new();
@@ -39,10 +43,6 @@ namespace Dungeon.Data
         public List<RectInt> Doors { get => doors; }
         [SerializeField] private List<RectInt> doors = new();
         [SerializeField] private Graph<Room> mainGraph = new();
-        [HorizontalLine(height: 1)]
-        [Header("Events")]
-        [SerializeField] private UnityEvent OnDataGenerationFinished;
-        [SerializeField] private UnityEvent<Vector3> OnDataGenerationFinishedVector3;
         private System.Random _random;
 
         /// <summary>
@@ -102,7 +102,6 @@ namespace Dungeon.Data
             yield return StartCoroutine(CreateDoors());
             yield return new WaitForSeconds(GenerationSettings.delaySettings.actionDelay);
             OnDataGenerationFinished?.Invoke();
-            OnDataGenerationFinishedVector3?.Invoke(AlgorithmsUtils.CalculateMiddlePosition(StarterRoom));
         }
 
         /// <summary>

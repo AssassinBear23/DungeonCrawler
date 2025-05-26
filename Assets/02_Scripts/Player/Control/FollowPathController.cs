@@ -5,24 +5,52 @@ using UnityEngine;
 namespace Player.Movement
 {
     using Pathfinding;
-    using Unity.Hierarchy;
+    using UnityEngine.AI;
 
     public class FollowPathController : MonoBehaviour
     {
 
-        [SerializeField]
-        private PathFinder pathFinder;
+        [SerializeField] private PathFinder pathFinder;
+        [SerializeField] private NavMeshAgent agent;
+        [SerializeField] private PathFinding toUsePathFinding = PathFinding.NavMesh;
 
-        [SerializeField]
-        private float speed = 5f;
+        [SerializeField] private float speed = 5f;
 
         private bool isMoving = false;
+
+        private void Start()
+        {
+            if (agent == null)
+                agent = GetComponentInChildren<NavMeshAgent>();
+            if (agent == null)
+            {
+                Debug.LogError("NavMeshAgent component is missing on the GameObject.");
+                return;
+            }
+            agent.updateRotation = false;
+        }
+
+        private void Update()
+        {
+            if (agent.enabled && toUsePathFinding == PathFinding.AStar)
+            {
+                agent.enabled = false;
+            }
+
+            if (!agent.enabled && toUsePathFinding == PathFinding.NavMesh)
+            {
+                agent.enabled = true;
+            }
+        }
 
         public void GoToDestination(Vector3 destination)
         {
             if (!isMoving)
             {
-                StartCoroutine(FollowPathCoroutine(pathFinder.CalculatePath(transform.position, destination)));
+                if (toUsePathFinding == PathFinding.AStar)
+                    StartCoroutine(FollowPathCoroutine(pathFinder.CalculatePath(transform.position, destination)));
+                else if (toUsePathFinding == PathFinding.NavMesh)
+                    agent.SetDestination(destination);
             }
         }
 
@@ -35,7 +63,7 @@ namespace Player.Movement
             }
         }
 
-            IEnumerator FollowPathCoroutine(List<Vector3> path)
+        IEnumerator FollowPathCoroutine(List<Vector3> path)
         {
             if (path == null || path.Count == 0)
             {
@@ -57,5 +85,11 @@ namespace Player.Movement
             isMoving = false;
         }
 
+        private enum PathFinding
+        {
+            NavMesh,
+            AStar
+        }
     }
+
 }

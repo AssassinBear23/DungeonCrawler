@@ -8,6 +8,7 @@ namespace Dungeon.Generation
 {
     using Data;
     using DataStructures;
+    using UnityEngine.Events;
     using Utilities;
 
     /// <summary>
@@ -31,6 +32,9 @@ namespace Dungeon.Generation
         [Tooltip("Parent object for the floor")]
         [SerializeField] private GameObject parentFloor;
 
+        [Header("Events")]
+        [SerializeField] private UnityEvent onGenerationFinished;
+
         [Header("Debug")]
         [SerializeField] private int iViz = -1;
         [SerializeField] private int jViz = -1;
@@ -53,6 +57,7 @@ namespace Dungeon.Generation
             yield return new WaitForSeconds(DungeonDataGenerator.Instance.GenerationSettings.delaySettings.actionDelay);
             yield return StartCoroutine(CreateWalls());
             CreateCollider();
+            onGenerationFinished?.Invoke();
         }
 
         private void CreateCollider()

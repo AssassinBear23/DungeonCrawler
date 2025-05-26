@@ -109,7 +109,7 @@ namespace Dungeon.Data
         /// <returns>A string representation of the tile map, where different symbols represent different tile types.</returns>
         new private string ToString()
         {
-            if (printMap) return null;
+            if (!printMap) return null;
             if (TileMap == null) return "Tile map not generated yet.";
 
             int rows = TileMap.GetLength(0);

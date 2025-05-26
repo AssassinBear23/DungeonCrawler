@@ -106,10 +106,10 @@ namespace Dungeon.Utilities
             DebugExtension.DebugBounds(new Bounds(new Vector3(rectInt.center.x, 0, rectInt.center.y), new Vector3(rectInt.width, height, rectInt.height)), color, duration, depthTest);
         }
         /// <summary>
-        /// Calculates the overlay position of a given room.
+        /// Calculates the overlay dimensions of a given room.
         /// </summary>
-        /// <param name="room">The room for which to calculate the overlay position.</param>
-        /// <returns>A RectInt representing the overlay position of the room.</returns>
+        /// <param name="room">The room for which to calculate the overlay dimensions.</param>
+        /// <returns>A RectInt representing the overlay dimensions of the room.</returns>
         public static RectInt CalculateOverlayPosition(Room room)
         {
             RectInt position = room.roomDimensions;
@@ -118,6 +118,23 @@ namespace Dungeon.Utilities
             position.width = 1;
             position.height = 1;
             return position;
+        }
+
+        /// <summary>
+        /// Calculates the center position of the given room as a <see cref="Vector3"/>.
+        /// The center is computed based on the room's dimensions, with the Y coordinate set to 0.
+        /// </summary>
+        /// <param name="room">The <see cref="Room"/> whose center position is to be calculated.</param>
+        /// <returns>
+        /// A <see cref="Vector3"/> representing the center of the room in world space,
+        /// where X and Z correspond to the center of the room's rectangle, and Y is 0.
+        /// </returns>
+        public static Vector3 CalculateMiddlePosition(Room room)
+        {
+            RectInt dimensions = room.roomDimensions;
+            float xMiddle = dimensions.x + (dimensions.width / 2f);
+            float zMiddle = dimensions.y + (dimensions.height / 2f);
+            return new Vector3(xMiddle, 0, zMiddle);
         }
 
         /// <summary>

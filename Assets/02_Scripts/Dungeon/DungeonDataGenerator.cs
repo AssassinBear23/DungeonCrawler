@@ -41,7 +41,8 @@ namespace Dungeon.Data
         [SerializeField] private Graph<Room> mainGraph = new();
         [HorizontalLine(height: 1)]
         [Header("Events")]
-        [SerializeField] private UnityEvent onDungeonGenerationStart;
+        [SerializeField] private UnityEvent OnDataGenerationFinished;
+        [SerializeField] private UnityEvent<Vector3> OnDataGenerationFinishedVector3;
         private System.Random _random;
 
         /// <summary>
@@ -100,7 +101,8 @@ namespace Dungeon.Data
             yield return new WaitForSeconds(GenerationSettings.delaySettings.actionDelay);
             yield return StartCoroutine(CreateDoors());
             yield return new WaitForSeconds(GenerationSettings.delaySettings.actionDelay);
-            onDungeonGenerationStart?.Invoke();
+            OnDataGenerationFinished?.Invoke();
+            OnDataGenerationFinishedVector3?.Invoke(AlgorithmsUtils.CalculateMiddlePosition(StarterRoom));
         }
 
         /// <summary>

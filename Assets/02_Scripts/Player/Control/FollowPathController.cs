@@ -12,7 +12,7 @@ namespace Player.Movement
 
         [SerializeField] private PathFinder pathFinder;
         [SerializeField] private NavMeshAgent agent;
-        [SerializeField] private PathFinding toUsePathFinding = PathFinding.NavMesh;
+        [SerializeField] private PathFindingType toUsePathFinding = PathFindingType.NavMesh;
 
         [SerializeField] private float speed = 5f;
 
@@ -32,12 +32,12 @@ namespace Player.Movement
 
         private void Update()
         {
-            if (agent.enabled && toUsePathFinding == PathFinding.AStar)
+            if (agent.enabled && toUsePathFinding != PathFindingType.NavMesh)
             {
                 agent.enabled = false;
             }
 
-            if (!agent.enabled && toUsePathFinding == PathFinding.NavMesh)
+            if (!agent.enabled && toUsePathFinding == PathFindingType.NavMesh)
             {
                 agent.enabled = true;
             }
@@ -47,10 +47,10 @@ namespace Player.Movement
         {
             if (!isMoving)
             {
-                if (toUsePathFinding == PathFinding.AStar)
-                    StartCoroutine(FollowPathCoroutine(pathFinder.CalculatePath(transform.position, destination)));
-                else if (toUsePathFinding == PathFinding.NavMesh)
+                if (toUsePathFinding == PathFindingType.NavMesh)
                     agent.SetDestination(destination);
+                else
+                    StartCoroutine(FollowPathCoroutine(pathFinder.CalculatePath(transform.position, destination, toUsePathFinding)));
             }
         }
 
@@ -85,11 +85,12 @@ namespace Player.Movement
             isMoving = false;
         }
 
-        private enum PathFinding
-        {
-            NavMesh,
-            AStar
-        }
+    }
+    public enum PathFindingType
+    {
+        NavMesh,
+        AStar,
+        Recursion,
     }
 
 }

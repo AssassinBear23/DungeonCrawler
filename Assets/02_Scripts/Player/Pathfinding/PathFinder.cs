@@ -1,4 +1,3 @@
-using AYellowpaper.SerializedCollections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +6,8 @@ namespace Player.Pathfinding
     using Dungeon.Data;
     using Dungeon.DataStructures;
     using Dungeon.Utilities;
+    using Movement;
+    using System.Linq;
     using UnityEditor;
 
     /// <summary>
@@ -82,14 +83,19 @@ namespace Player.Pathfinding
         /// <param name="from">The starting position.</param>
         /// <param name="to">The target position.</param>
         /// <returns>A list of Vector3 positions representing the shortest path, or an empty list if no path is found.</returns>
-        public List<Vector3> CalculatePath(Vector3 from, Vector3 to)
+        public List<Vector3> CalculatePath(Vector3 from, Vector3 to, PathFindingType toUsePathFinding)
         {
             Vector3 playerPosition = from;
 
             startNode = GetClosestNodeToPosition(playerPosition);
             endNode = GetClosestNodeToPosition(to);
 
-            List<Vector3> shortestPath = AStar(startNode, endNode);
+            List<Vector3> shortestPath = new();
+
+            if (toUsePathFinding == PathFindingType.AStar)
+                shortestPath = AStar(startNode, endNode);
+            else if (toUsePathFinding == PathFindingType.Recursion)
+                shortestPath = RecursiveDFS(startNode, endNode, new());
 
             path = shortestPath; //Used for drawing the path
 
@@ -135,6 +141,42 @@ namespace Player.Pathfinding
                 }
             }
             return new List<Vector3>(); // No path found
+        }
+
+        /// <summary>
+        /// Performs a recursive depth-first search (DFS) to find a path from the current node to the end node.
+        /// </summary>
+        /// <param name="current">The node currently being explored.</param>
+        /// <param name="end">The target node to reach.</param>
+        /// <param name="visited">A list of nodes that have already been visited to prevent cycles.</param>
+        /// <returns>
+        /// A list of <see cref="Vector3"/> positions representing the path from the current node to the end node,
+        /// or <c>null</c> if no path is found.
+        /// </returns>
+        private List<Vector3> RecursiveDFS(Vector3 current, Vector3 end, List<Vector3> visited)
+        {
+            if (current == end) return new() { end };
+
+            visited.Add(current);
+            discovered.Add(current);
+
+            List<Vector3> neighbours = graph.GetNeighbours(current);
+
+            neighbours.Sort((a, b) => Heuristic(a, end).CompareTo(Heuristic(b,end))); // Sort by distance to end node
+
+            foreach (var neighbor in neighbours)
+            {
+                if (visited.Contains(neighbor)) continue;
+
+                var path = RecursiveDFS(neighbor, end, visited);
+                
+                if (path != null && path.Count > 0)
+                {
+                    path.Insert(0, current);
+                    return path;
+                }
+            }
+            return null;
         }
 
         /// <summary>

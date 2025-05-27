@@ -34,6 +34,7 @@ namespace Dungeon.Data
         [Header("Events")]
         [SerializeField] private UnityEvent OnDataGenerationFinished;
         [SerializeField] private UnityEvent<Vector3> OnDataGenerationFinishedVector3;
+        [SerializeField] private UnityEvent onGenerationReset;
         [Space(10), HorizontalLine(height: 1)]
         [Header("Debugging Lists")]
         [SerializeField] private List<Room> toSplitRooms = new();
@@ -115,6 +116,7 @@ namespace Dungeon.Data
             unreachableRooms.Clear();
             doors.Clear();
             mainGraph = new();
+            onGenerationReset?.Invoke();
         }
 
         /// <summary>

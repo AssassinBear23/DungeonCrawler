@@ -89,8 +89,7 @@ namespace Player.Movement
     public enum PathFindingType
     {
         NavMesh,
-        AStar,
-        Recursion,
+        AStar
     }
 
 }

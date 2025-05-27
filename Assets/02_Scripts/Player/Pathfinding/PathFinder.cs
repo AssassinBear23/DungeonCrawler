@@ -21,7 +21,7 @@ namespace Player.Pathfinding
 
         [Header("Debug Variables")]
         [SerializeField] private List<Vector3> path = new();
-        [SerializeField] private SerializedDictionary<Vector3, float> costDictionary = new();
+        [SerializeField] private SerializedDictionary<Vector3, float> endCostDictionary = new();
         private Graph<Vector3> graph;
         [SerializeField] private bool showDiscovered;
         [SerializeField] private bool showPath;
@@ -95,8 +95,6 @@ namespace Player.Pathfinding
 
             if (toUsePathFinding == PathFindingType.AStar)
                 shortestPath = AStar(startNode, endNode);
-            else if (toUsePathFinding == PathFindingType.Recursion)
-                shortestPath = RecursiveDFS(startNode, endNode, new());
 
             path = shortestPath; //Used for drawing the path
 
@@ -112,7 +110,7 @@ namespace Player.Pathfinding
         private List<Vector3> AStar(Vector3 start, Vector3 end)
         {
             discovered.Clear();
-            costDictionary.Clear();
+            endCostDictionary.Clear();
 
             Graph<Vector3> graph = graphGenerator.Graph;
             PriorityQueue<Vector3> priorityQueue = new();
@@ -120,7 +118,7 @@ namespace Player.Pathfinding
 
             Vector3 current = start;
             priorityQueue.Enqueue(current, 0);
-            costDictionary[current] = 0;
+            endCostDictionary[current] = 0;
 
             while (priorityQueue.Count > 0)
             {
@@ -132,52 +130,16 @@ namespace Player.Pathfinding
                 }
                 foreach (Vector3 neighbour in graph.GetNeighbours(current))
                 {
-                    float newCost = costDictionary[current] + Cost(current, neighbour);
-                    if (!costDictionary.ContainsKey(neighbour) || newCost < costDictionary[neighbour])
+                    float newCost = endCostDictionary[current] + Cost(current, neighbour);
+                    if (!endCostDictionary.ContainsKey(neighbour) || newCost < endCostDictionary[neighbour])
                     {
-                        costDictionary[neighbour] = newCost;
+                        endCostDictionary[neighbour] = newCost;
                         pathDictionary[neighbour] = current;
                         priorityQueue.Enqueue(neighbour, newCost + Heuristic(neighbour, end));
                     }
                 }
             }
             return new List<Vector3>(); // No path found
-        }
-
-        /// <summary>
-        /// Performs a recursive depth-first search (DFS) to find a path from the current node to the end node.
-        /// </summary>
-        /// <param name="current">The node currently being explored.</param>
-        /// <param name="end">The target node to reach.</param>
-        /// <param name="visited">A list of nodes that have already been visited to prevent cycles.</param>
-        /// <returns>
-        /// A list of <see cref="Vector3"/> positions representing the path from the current node to the end node,
-        /// or <c>null</c> if no path is found.
-        /// </returns>
-        private List<Vector3> RecursiveDFS(Vector3 current, Vector3 end, List<Vector3> visited)
-        {
-            if (current == end) return new() { end };
-
-            visited.Add(current);
-            discovered.Add(current);
-
-            List<Vector3> neighbours = graph.GetNeighbours(current);
-
-            neighbours.Sort((a, b) => Heuristic(a, end).CompareTo(Heuristic(b,end))); // Sort by distance to end node
-
-            foreach (var neighbor in neighbours)
-            {
-                if (visited.Contains(neighbor)) continue;
-
-                var path = RecursiveDFS(neighbor, end, visited);
-                
-                if (path != null && path.Count > 0)
-                {
-                    path.Insert(0, current);
-                    return path;
-                }
-            }
-            return null;
         }
 
         /// <summary>
@@ -255,9 +217,9 @@ namespace Player.Pathfinding
             }
 
 #if UNITY_EDITOR
-            if (costDictionary.Count != 0 && showCost)
+            if (endCostDictionary.Count != 0 && showCost)
             {
-                foreach (var kvp in costDictionary)
+                foreach (var kvp in endCostDictionary)
                 {
                     Gizmos.color = Color.white;
                     Handles.Label(new(kvp.Key.x, kvp.Key.y + .5f, kvp.Key.z), kvp.Value.ToString());

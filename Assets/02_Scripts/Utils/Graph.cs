@@ -105,40 +105,22 @@ namespace Dungeon.DataStructures
                 return false;
             }
 
-            // Perform DFS to check connectivity
-            HashSet<T> visited = new();
             if (startingNode == null)
             {
                 return false;
             }
 
-            Stack<T> stack = new();
-            stack.Push(startingNode);
+            HashSet<T> visited = new();
 
-            while (stack.Count > 0)
-            {
-                T current = stack.Pop();
-                if (!visited.Add(current))
-                {
-                    continue;
-                }
+            RecursiveDFS(startingNode, nodeToRemove, visited);
 
-                foreach (T neighbor in adjacencies[current])
-                {
-                    if (!neighbor.Equals(nodeToRemove) && !visited.Contains(neighbor))
-                    {
-                        stack.Push(neighbor);
-                    }
-                }
-            }
-
-            // Check if all nodes except the room to remove are visited
+            // Check if all nodes except the node to remove are visited
             if (visited.Count != adjacencies.Count - 1)
             {
                 return false;
             }
 
-            // Remove the room and its references
+            // Remove the node and its references
             foreach (T neighbor in adjacencies[nodeToRemove])
             {
                 adjacencies[neighbor].Remove(nodeToRemove);
@@ -146,6 +128,28 @@ namespace Dungeon.DataStructures
             adjacencies.Remove(nodeToRemove);
 
             return true;
+        }
+
+        /// <summary>
+        /// Performs a recursive depth-first search (DFS) traversal of the graph, 
+        /// visiting all nodes connected to <paramref name="current"/> except for <paramref name="nodeToRemove"/>.
+        /// Marks each visited node in the <paramref name="visited"/> set.
+        /// </summary>
+        /// <param name="current">The node currently being visited.</param>
+        /// <param name="nodeToRemove">The node to exclude from traversal (as if it were removed from the graph).</param>
+        /// <param name="visited">A set of nodes that have already been visited during traversal.</param>
+        private void RecursiveDFS(T current, T nodeToRemove, HashSet<T> visited)
+        {
+            if (!visited.Add(current))
+                return;
+
+            foreach (T neighbor in adjacencies[current])
+            {
+                if (!neighbor.Equals(nodeToRemove) && !visited.Contains(neighbor))
+                {
+                    RecursiveDFS(neighbor, nodeToRemove, visited);
+                }
+            }
         }
     }
 }

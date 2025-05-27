@@ -954,9 +954,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   graphGenerator: {fileID: 1564286930}
   path: []
-  costDictionary:
-    m_Keys: []
-    m_Values: []
+  endCostDictionary:
+    _serializedList: []
   showDiscovered: 0
   showPath: 0
   showCost: 0
@@ -976,7 +975,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pathFinder: {fileID: 1625450900}
   agent: {fileID: 0}
-  toUsePathFinding: 3
+  toUsePathFinding: 1
   speed: 5
 --- !u!114 &1625450902
 MonoBehaviour:

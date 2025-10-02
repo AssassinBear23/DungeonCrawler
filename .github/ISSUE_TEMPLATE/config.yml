@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a Question
+    url: https://github.com/AssassinBear23/DungeonCrawler/issues/new
+    about: Use a normal issue with the [DOC] or [FEATURE] template if it doesn’t fit Bug.

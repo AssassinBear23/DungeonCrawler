@@ -1,84 +1,48 @@
 name: Feature Request
-description: Propose a new gameplay, generation, or pathfinding capability
-title: "[FEATURE] <short summary>"
+description: Propose a new capability or improvement.
+title: "[FEATURE] "
 labels:
   - Feature
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Provide a concise user story and acceptance criteria. Keep scope tight.
   - type: textarea
-    id: summary
+    id: problem
     attributes:
-      label: Summary
-      placeholder: Add door orientation differentiation in tile map.
+      label: Problem / Gap
+      description: What pain point or limitation are we addressing?
+      placeholder: Pathfinding nodes feel jagged, no smoothing...
     validations:
       required: true
   - type: textarea
-    id: user-story
+    id: goal
     attributes:
-      label: User Story
-      placeholder: As a player/dev, I want ...
+      label: Desired Outcome
+      description: What success looks like (player / system benefit).
+      placeholder: Smoother movement with fewer waypoint turns...
     validations:
       required: true
   - type: textarea
-    id: value
+    id: core_requirements
     attributes:
-      label: Motivation / Value
-      placeholder: Why important for demo or architecture goals?
-    validations:
-      required: true
-  - type: textarea
-    id: proposed
-    attributes:
-      label: Proposed Solution
-      placeholder: High-level approach, data structures, algorithms, prefabs.
-    validations:
-      required: true
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives Considered
-      placeholder: Summarize other options and why rejected.
+      label: Core Requirements
+      description: Bullet list of must-haves. Use - item per line (I’ll convert to checklist manually if needed).
+      placeholder: |
+        - Support toggling path smoothing
+        - Maintain current A* performance envelope
   - type: textarea
     id: acceptance
     attributes:
       label: Acceptance Criteria
+      description: Concrete pass/fail statements (Given/When/Then optional).
       placeholder: |
-        - Tile map encodes horizontal vs vertical doors differently
-        - Flood fill still functions
-        - Pathfinding unaffected
-    validations:
-      required: true
-  - type: textarea
-    id: out-of-scope
-    attributes:
-      label: Out of Scope
-      placeholder: Animated door opening; locking system.
-  - type: textarea
-    id: dependencies
-    attributes:
-      label: Dependencies / Related Issues
-      placeholder: References (#12 etc)
-  - type: dropdown
-    id: priority
-    attributes:
-      label: Priority
-      options: [Critical, High, Medium, Low]
-      default: 2
-  - type: dropdown
-    id: size
-    attributes:
-      label: Size
-      options: ["15 Mins","30 Mins","1 Hour","2 Hours","+4 Hours"]
-      default: 2
-  - type: textarea
-    id: risks
-    attributes:
-      label: Risks / Open Questions
-      placeholder: Performance? Complexity? Unknown Unity constraints?
+        - Character traverses same path with <= 20% fewer nodes
+        - No collisions introduced in smoothed path
   - type: textarea
     id: notes
     attributes:
-      label: Additional Notes
+      label: Notes / References (optional)
+      placeholder: Links, related issues, algorithms (e.g., funnel, string pulling)...
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of Scope (optional)
+      placeholder: Not adding dynamic obstacle avoidance yet...

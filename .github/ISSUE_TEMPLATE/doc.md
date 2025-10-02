@@ -1,35 +1,31 @@
----
-name: Documentation Task
-about: Improve or add project documentation / comments / diagrams
-title: "[DOC] "
-labels: ["Documentation"]
-assignees: []
----
+# [DOC] <topic>
 
-## Summary
-<!-- What doc/change is needed? -->
+**What Needs Documenting**
+- 
 
-## Audience / Scope
-<!-- Who is this for (future devs, graders, players)? What parts of the system? -->
+**Purpose**
+<onboarding / clarify system / usage / maintenance>
 
-## Content Outline
-- Section 1:
-- Section 2:
-- Section 3:
+**Scope**
+In:
+- 
+Out:
+- 
 
-## Source Material / References
-<!-- Existing code areas, prior notes, external articles -->
+**Sections**
+- Overview
+- Key Concepts / Components
+- Usage / How to Run
+- Constraints / Assumptions
+- Extension Points (if any)
 
-## Acceptance Criteria
-- [ ] Covers all listed sections
-- [ ] Accurate vs current code
-- [ ] Clear formatting / examples where needed
+**Acceptance Criteria**
+- [ ] All sections filled
+- [ ] Matches current code
+- [ ] Examples / steps verified
 
-## Format
-<!-- README section, separate .md file, inline XML docs, diagrams, etc. -->
+**Source Pointers**
+- 
 
-## Additional Notes
-<!-- Diagram tool preferences, style guide links -->
-
-Priority: Low
-Size: 30 Mins
+**References (optional)**
+- 

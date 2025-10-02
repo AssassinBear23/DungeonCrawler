@@ -4,6 +4,7 @@ on:
   issues:
     types: [opened, edited, labeled, unlabeled, reopened]
 
+# Only request what you need. If you keep the project mutation, include 'projects'.
 permissions:
   contents: read
   issues: write
@@ -29,5 +30,10 @@ jobs:
           github-token: ${{ secrets.PROJECT_AUTOMATION_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const script = fs.readFileSync('.github/scripts/project-issue-automation.js','utf8');
-            await eval(script);
+            const path = '.github/scripts/project-issue-automation.js';
+            if (!fs.existsSync(path)) {
+              core.setFailed(`Script not found: ${path}`);
+            } else {
+              const script = fs.readFileSync(path,'utf8');
+              await eval(script);
+            }

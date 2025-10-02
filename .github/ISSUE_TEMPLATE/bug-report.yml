@@ -1,0 +1,102 @@
+name: Bug Report
+description: Report a defect in dungeon generation, pathfinding, or related systems
+title: "[BUG] <short summary>"
+labels:
+  - Bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to report gameplay, generation, or pathfinding defects.
+        Provide clear Steps to Reproduce so the issue is actionable.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One–two sentence high-level description.
+      placeholder: Flood fill starts at wrong tile for non-square starter room.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: What breaks or degrades? Is this blocking progress?
+      placeholder: Starting tile chosen incorrectly -> partial floor generation.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Numbered, deterministic steps.
+      placeholder: |
+        1. Set starter room to rectangular 20x10
+        2. Generate dungeon
+        3. Observe floor fill origin not at room center
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      placeholder: Flood fill begins at true geometric center.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      placeholder: Started at (x,x) instead of (x,y).
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Bullet list of objective pass/fail checks.
+      placeholder: |
+        - Fill origin == center.x, center.y
+        - Non-square rooms fully covered
+        - No regression for square rooms
+    validations:
+      required: true
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: Suggested Fix (Optional)
+      placeholder: Replace second center.x with center.y in DungeonGenerator.CreateFloor().
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+      description: Initial priority guess; can be re-triaged.
+      default: 1
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      options:
+        - 15 Mins
+        - 30 Mins
+        - 1 Hour
+        - 2 Hours
+        - +4 Hours
+      description: Effort estimate for the fix.
+      default: 0
+  - type: input
+    id: environment
+    attributes:
+      label: Environment / Context
+      description: Unity version, branch, platform.
+      placeholder: Unity 2022.3.x, main branch, Windows
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      placeholder: Logs, screenshots, stack traces.

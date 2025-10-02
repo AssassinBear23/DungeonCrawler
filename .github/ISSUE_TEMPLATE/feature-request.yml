@@ -1,0 +1,84 @@
+name: Feature Request
+description: Propose a new gameplay, generation, or pathfinding capability
+title: "[FEATURE] <short summary>"
+labels:
+  - Feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Provide a concise user story and acceptance criteria. Keep scope tight.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: Add door orientation differentiation in tile map.
+    validations:
+      required: true
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User Story
+      placeholder: As a player/dev, I want ...
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: Motivation / Value
+      placeholder: Why important for demo or architecture goals?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Solution
+      placeholder: High-level approach, data structures, algorithms, prefabs.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      placeholder: Summarize other options and why rejected.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      placeholder: |
+        - Tile map encodes horizontal vs vertical doors differently
+        - Flood fill still functions
+        - Pathfinding unaffected
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of Scope
+      placeholder: Animated door opening; locking system.
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / Related Issues
+      placeholder: References (#12 etc)
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options: [Critical, High, Medium, Low]
+      default: 2
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      options: ["15 Mins","30 Mins","1 Hour","2 Hours","+4 Hours"]
+      default: 2
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks / Open Questions
+      placeholder: Performance? Complexity? Unknown Unity constraints?
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
